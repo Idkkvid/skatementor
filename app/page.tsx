@@ -2,120 +2,7 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
-
-interface Skater {
-  id: number;
-  name: string;
-  experienceLabel: string;
-  badgeTop: string;
-  city: string;
-  price: number;
-  priceFormatted: string;
-  modalities: string[];
-  level: string;
-  bio: string;
-  whatsappUrl: string;
-  imageUrl: string;
-}
-
-const SKATERS: Skater[] = [
-  {
-    id: 1,
-    name: "Mateo Silva",
-    experienceLabel: "7 años de experiencia técnica",
-    badgeTop: "Pro Rider",
-    city: "Barranquilla",
-    price: 45000,
-    priceFormatted: "$45.000",
-    modalities: ["Street", "Grind & Slide"],
-    level: "Intermedio",
-    bio: "Especialista en pop shuvits, 50-50 grinds y drop-ins con total seguridad en spots urbanos de la Costa.",
-    whatsappUrl:
-      "https://api.whatsapp.com/send?phone=573001234567&text=Hola%20Mateo,%20vi%20tu%20perfil%20en%20SkateMentor%20y%20quisiera%20agendar%20una%20clase",
-    imageUrl:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuA0Gj1uQiQzoI91uZLt7oH4A2NpjL-fnjjaZaFm6Op4lYRFfAEf1S2z3PFrSsTEKZv6AkDhxvjl_EEDqV3hGozrTIMAusNJMhXk9hpNZWaKlG_shaCS_jZQ6WtIDqB38BaApLocvK4TXuHcgPWlR68PwSXwDZxHBlbbf1Ikd4jwNllVu1rRec3upPzCIkBg96r0pecTuZ6gQqozQvMHDFED6ZXw-yeIG5iwMlwWb8Q",
-  },
-  {
-    id: 2,
-    name: "Camila Rincón",
-    experienceLabel: "Paciencia total con principiantes",
-    badgeTop: "5 años exp.",
-    city: "Bogotá",
-    price: 40000,
-    priceFormatted: "$40.000",
-    modalities: ["Bowl", "Park"],
-    level: "Iniciación",
-    bio: "Domina la velocidad, líneas de bowl y bombeo continuo. Metodología progresiva sin miedos ni lesiones.",
-    whatsappUrl:
-      "https://api.whatsapp.com/send?phone=573007654321&text=Hola%20Camila,%20vi%20tu%20perfil%20en%20SkateMentor%20y%20quisiera%20agendar%20una%20clase",
-    imageUrl:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuA0QHNOi8CVx2FGSOexQMLbuXMWZIcIXqj_36H9KAGfVmgFyF4gTFjw1iI9fyA4dBjPNEm6qN5h_hpGkGkdOTPDXE7ksM_-r5DxDfuFcmutBRh9XBR2w-UJAIal1jOQeNUlkjXzBBumSY02tZ3Am-4hNA6qg8mWlXxwq29rDPGJ-i1Xa60WTqtznIquwXCZW0RB8afzbgj2I0t1tIXGJSp7cmENh9F-7laHkrVh0sw",
-  },
-  {
-    id: 3,
-    name: "Daniel Mejía",
-    experienceLabel: "Finalista nacional en Street League",
-    badgeTop: "Pro Rider",
-    city: "Medellín",
-    price: 65000,
-    priceFormatted: "$65.000",
-    modalities: ["Grind & Slide", "Street"],
-    level: "Avanzado",
-    bio: "Perfecciona boardslides, smith grinds y combos técnicos en barandas con feedback de video en vivo.",
-    whatsappUrl:
-      "https://api.whatsapp.com/send?phone=573119876543&text=Hola%20Daniel,%20vi%20tu%20perfil%20en%20SkateMentor%20y%20quisiera%20agendar%20una%20clase",
-    imageUrl:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuAXdHezLpob1184jtZQwEcOicB89Yr0F4Tq402Lzy-JYMh_v6DbRa0O5nm6r2Gqz-0x1CGitII6arGe-rho85LXIG_rMDSwJWLlz9di9bWNV01w-eimFqXI4UoGuHy41EKOcTfTLXfFOdShh-hivNI8QcCrzkd7uy5oomfMNhovKiWw_rNGU9IYul0UONN-itA8DHEVUMmaSXnkPY8p-sSVLX5hmsVtSaP9M2t1F00",
-  },
-  {
-    id: 4,
-    name: "Valeria Ortiz",
-    experienceLabel: "Fundamentos para niños y jóvenes",
-    badgeTop: "4 años exp.",
-    city: "Barranquilla",
-    price: 35000,
-    priceFormatted: "$35.000",
-    modalities: ["Street", "Freestyle"],
-    level: "Iniciación",
-    bio: "Aprende el Ollie perfecto, equilibrio dinámico y cómo caer correctamente para evitar cualquier golpe.",
-    whatsappUrl:
-      "https://api.whatsapp.com/send?phone=573003456789&text=Hola%20Valeria,%20vi%20tu%20perfil%20en%20SkateMentor%20y%20quisiera%20agendar%20una%20clase",
-    imageUrl:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuDt9KTkCFVVyymlbL9gzhHdoo7BLNqy_g5pJ3p171QJjG9f7zICuB0X2wp7WgEwL7-DcxX6uf_oQB4JeW0VAobKjGqQBBlJdidgEusaey4RuO4l-IZSEXGSG46YYvkAhmDsvcBQmE8UqwxCcZ5eyzdk8NvF5z7xfmfEjwwvAejiESogbfngx-cWp78aAR4sdsaUV0y0Mm6w-pVQx_qepno-BE02SHcVWA6H0Drk4Hg",
-  },
-  {
-    id: 5,
-    name: "Carlos Varela",
-    experienceLabel: "8 años de competencia regional",
-    badgeTop: "Pro Rider",
-    city: "Medellín",
-    price: 50000,
-    priceFormatted: "$50.000",
-    modalities: ["Park", "Bowl"],
-    level: "Intermedio",
-    bio: "Control de quarters, transferencias entre rampas y velocidad para dominar cualquier Skatepark del país.",
-    whatsappUrl:
-      "https://api.whatsapp.com/send?phone=573155554321&text=Hola%20Carlos,%20vi%20tu%20perfil%20en%20SkateMentor%20y%20quisiera%20agendar%20una%20clase",
-    imageUrl:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuAIeIJwTYUYWsGytwv4I0dSHq2qKXn-lipPy1OFn1U3eataRYyLPk9XFBAhGAjJ4Jdb63N-mUWxikKqHlyT9XzDRgR6J3TjqIoIARh8N57LF1s-EHVHwIncp3LRGOVP8bMI3cZ4VU37l8DH3P-6H1lWZ3d245j6I8BmF2f72TzGO-NDKTH8yH2vSGKsBAg6Ew5AEP0s6WHXlBNYRuksoFCxlq4-mqNGiHHbzFcOnZk",
-  },
-  {
-    id: 6,
-    name: "Santiago Giraldo",
-    experienceLabel: "Especialista en flip tricks y gaps",
-    badgeTop: "6 años exp.",
-    city: "Bogotá",
-    price: 55000,
-    priceFormatted: "$55.000",
-    modalities: ["Street", "Grind & Slide"],
-    level: "Avanzado",
-    bio: "Kickflips consistentes, heelflips y control en desniveles urbanos. Clases intensivas para desbloquear trucos.",
-    whatsappUrl:
-      "https://api.whatsapp.com/send?phone=573187654321&text=Hola%20Santiago,%20vi%20tu%20perfil%20en%20SkateMentor%20y%20quisiera%20agendar%20una%20clase",
-    imageUrl:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuAMAgwq3WW1J5BiAtSIC_zpjLGtkRx5VKw-9P9Y3n1S_f275MCPSI-KpPbOtmtE_eV_5NtPvjMKhW1xuUw60BRy1oaeZyYib0KDoAKgZpuQYJdoWH_HKaa85NEGPAD5V0m8zhnU9d2SthiWz6z0WGrkTHIdkecQ6AtLbqr12DriA1cw3Adw_V2C-KpmCprAzXvNhYUJw6Nl9qh23Bu2OLSH-67VEL7RIIT3ohp6Tdg",
-  },
-];
+import { SKATERS } from "./data/skaters";
 
 const MODALITY_TABS = ["all", "Street", "Bowl", "Grind & Slide", "Park"];
 const QUICK_TAGS = ["Street", "Bowl", "Grind & Slide", "Park", "Freestyle"];
@@ -510,12 +397,12 @@ export default function CatalogoPage() {
                       </svg>
                       <span>Contactar por WhatsApp</span>
                     </a>
-                    <button
-                      className="w-full bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md py-2 rounded-lg transition-colors cursor-pointer"
-                      type="button"
+                    <Link
+                      className="w-full bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md py-2 rounded-lg transition-colors text-center"
+                      href={`/skater/${skater.id}`}
                     >
                       Ver Perfil Completo
-                    </button>
+                    </Link>
                   </div>
                 </article>
               ))}
