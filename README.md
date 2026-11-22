@@ -12,7 +12,7 @@ En esta primera versión, el contacto se realiza **fuera de la aplicación**, po
 
 > **Nota de alcance:** Este README está elaborado a partir de la propuesta APA, no de una inspección del código fuente o de una instancia desplegada. Los comandos estándar de Next.js son una guía de ejecución; las variables de entorno, rutas de carpetas, secretos y capturas deben contrastarse con el repositorio real antes de la entrega. El enlace público se indica como dominio previsto, no como despliegue verificado.
 
-## Tabla de contenido
+### Tabla de contenido
 
 - [Tecnologías utilizadas](#tecnologías-utilizadas)
 - [Getting Started](#getting-started)
