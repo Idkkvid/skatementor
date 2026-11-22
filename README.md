@@ -1,4 +1,4 @@
-# SkateMentor 🛹
+# SkateMentor 🛹 
 
 **Plataforma web para encontrar y contactar skaters que ofrecen clases.**
 
