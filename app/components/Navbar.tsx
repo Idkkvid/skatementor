@@ -4,12 +4,7 @@ export default function Navbar() {
   return (
     <header className="fixed top-0 left-0 w-full z-50 bg-surface/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]">
       <div className="h-16 max-w-6xl mx-auto px-gutter-mobile md:px-gutter flex items-center justify-between gap-space-md">
-        <div className="flex items-center gap-space-sm">
-          <img
-            alt="SkateMentor Logo"
-            className="h-8 w-auto object-contain"
-            src="https://lh3.googleusercontent.com/aida/ALJJyrDxpuIwq5vtWr8IpJZAEYMPPJaF_asZV1Z824Uvzz1-uqoZP06Y8Jgkr3rt85SQi1rE55ZzBWGnAUsG9hIWJW8wiEkIY5suBCWbTdSZInOrwTkdV91NUoQMEIDZr5fyqnzjtxWtf82HOHCnOFp42fSYbEWh_HRbmP4kY28WeuMJ_vRNbFqzFzDwAnok5yBivWSAow-GXUT5MemMg5IkcJpm3MD-VaV9oJFjYQ7nQ_O5"
-          />
+        <div className="flex items-center">
           <Link
             className="font-headline-md text-headline-md font-bold tracking-tight text-on-surface"
             href="/"
