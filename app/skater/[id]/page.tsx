@@ -1,6 +1,11 @@
 import ProfileContent from "./ProfileContent";
+import { SKATERS } from "../../data/skaters";
 
-export const instant = false;
+export function generateStaticParams() {
+  return SKATERS.map((skater) => ({
+    id: skater.id.toString(),
+  }));
+}
 
 export default async function SkaterProfilePage({
   params,
