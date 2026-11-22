@@ -4,7 +4,7 @@ import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 
 export const metadata: Metadata = {
-  title: "SkateMentor | Aprende de los mejores sobre la tabla",
+  title: "SkateMentor",
   description:
     "Encuentra tu skater profesional y agenda tu clase técnica 1 a 1 en minutos en Colombia.",
 };
