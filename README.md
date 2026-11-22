@@ -1,4 +1,4 @@
-# SkateMentor 🛹 
+# SkateMentor 🛹
 
 **Plataforma web para encontrar y contactar skaters que ofrecen clases.**
 
@@ -350,6 +350,8 @@ La propuesta APA estima un costo de infraestructura de aproximadamente **USD 13,
 La instancia mantiene MySQL accesible únicamente desde `localhost` y el Security Group no debe abrir el puerto `3306`. Las imágenes S3 deben disponer de permisos ajustados a la forma en que se publican. Los respaldos con `mysqldump`, la protección de secretos y la revisión de Pull Requests son parte del procedimiento de operación esperado.
 
 **Pendiente antes de la entrega final:** incorporar la URL exacta de GitHub, confirmar los scripts de `package.json` y las variables reales, actualizar el árbol de carpetas según el código, añadir las capturas auténticas, comprobar el dominio público y adjuntar evidencia del workflow exitoso. Con ello, las seis secciones exigidas por la rúbrica quedarán documentadas con elementos verificables.
+
+## Evidencias del funcionamiento
 
 ---
 
