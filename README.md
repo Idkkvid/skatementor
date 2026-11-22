@@ -5,7 +5,7 @@
 SkateMentor es una aplicación web tipo SaaS que reúne perfiles de skaters con experiencia para que las personas interesadas en aprender puedan comparar modalidades, conocer la experiencia de cada instructor y contactarlo. El catálogo contempla disciplinas como *street*, *bowl*, *grind* y *slide*.
 
 En esta primera versión, el contacto se realiza **fuera de la aplicación**, por ejemplo, mediante WhatsApp o correo electrónico. **No se incluyen pagos ni reservas en línea.** El proyecto se desarrolla como trabajo académico de Buenas Prácticas de Desarrollo de Software, de la Universidad de la Costa (CUC), en noviembre de 2026.
-
+ 
 **Integrantes:** Vidal Niebles Cáceres y Mateo Pérez Núñez.  
 **Dominio previsto:** [http://skatementor.live](http://skatementor.live)  
 **Infraestructura propuesta:** AWS, región `us-east-1`.
