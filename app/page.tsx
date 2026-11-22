@@ -76,7 +76,7 @@ export default function CatalogoPage() {
                 Plataforma Oficial · Colombia Skate
               </div>
 
-              <h1 className="font-headline-xl text-headline-xl text-on-surface tracking-tight leading-none">
+              <h1 className="font-headline-xl text-[38px] leading-[44px] sm:text-[48px] sm:leading-[56px] text-on-surface tracking-tight text-balance">
                 Aprende de los{" "}
                 <span className="text-primary underline decoration-primary/30 underline-offset-4">
                   mejores
