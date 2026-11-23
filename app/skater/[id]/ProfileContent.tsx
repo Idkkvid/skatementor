@@ -11,10 +11,13 @@ import {
   isAdminEmail,
   VALID_ACCOUNTS,
 } from "../../../lib/auth";
+import { isValidAccountEmail } from "../../../lib/auth";
+import { getLocalVideo } from "../../../lib/local-media";
 
 const REGISTERED_SKATERS_KEY = "skatementor_registered_skaters";
 const ADMIN_REVIEWS_KEY = "skatementor_admin_reviews";
 const ADMIN_VERIFICATIONS_KEY = "skatementor_admin_verifications";
+const STUDENT_REVIEWS_KEY = "skatementor_student_reviews";
 
 export default function SkaterProfilePage({ id }: { id: string }) {
   const [copied, setCopied] = useState(false);
@@ -24,6 +27,12 @@ export default function SkaterProfilePage({ id }: { id: string }) {
   const [adminRating, setAdminRating] = useState(5);
   const [adminReviews, setAdminReviews] = useState<StudentReview[]>([]);
   const [isVerified, setIsVerified] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [studentName, setStudentName] = useState("");
+  const [studentComment, setStudentComment] = useState("");
+  const [studentRating, setStudentRating] = useState(5);
+  const [studentReviews, setStudentReviews] = useState<StudentReview[]>([]);
+  const [localVideoUrl, setLocalVideoUrl] = useState("");
 
   const skaterId = Number(id);
   const [skater, setSkater] = useState<SkaterProfile | undefined>(() =>
@@ -47,6 +56,23 @@ export default function SkaterProfilePage({ id }: { id: string }) {
   }, [skater, skaterId]);
 
   useEffect(() => {
+    let activeUrl = "";
+    if (skaterId >= 1000) {
+      getLocalVideo(`skater-${skaterId}`)
+        .then((video) => {
+          if (!video) return;
+          activeUrl = URL.createObjectURL(video);
+          setLocalVideoUrl(activeUrl);
+        })
+        .catch(() => setLocalVideoUrl(""));
+    }
+
+    return () => {
+      if (activeUrl) URL.revokeObjectURL(activeUrl);
+    };
+  }, [skaterId]);
+
+  useEffect(() => {
     const session = document.cookie
       .split("; ")
       .find((item) => item.startsWith("skatementor_session="))
@@ -54,6 +80,7 @@ export default function SkaterProfilePage({ id }: { id: string }) {
 
     if (!session) {
       setIsAdmin(false);
+      setIsAuthenticated(false);
       return;
     }
 
@@ -63,6 +90,7 @@ export default function SkaterProfilePage({ id }: { id: string }) {
         (item) => item.email.toLowerCase() === email.trim().toLowerCase()
       );
       setIsAdmin(isAdminEmail(email));
+      setIsAuthenticated(isValidAccountEmail(email));
       setAdminName(
         account?.email === "vidal@skatementor.com"
           ? "Vidal Niebles"
@@ -80,6 +108,14 @@ export default function SkaterProfilePage({ id }: { id: string }) {
         ? (JSON.parse(reviewsRaw) as Record<string, StudentReview[]>)
         : {};
       setAdminReviews(reviews[String(skaterId)] || []);
+
+      const studentReviewsRaw = localStorage.getItem(STUDENT_REVIEWS_KEY);
+      const studentReviewsByProfile = studentReviewsRaw
+        ? (JSON.parse(studentReviewsRaw) as Record<string, StudentReview[]>)
+        : {};
+      setStudentReviews(
+        studentReviewsByProfile[String(skaterId)] || []
+      );
 
       const verificationsRaw = localStorage.getItem(ADMIN_VERIFICATIONS_KEY);
       const verifications = verificationsRaw
@@ -177,9 +213,42 @@ export default function SkaterProfilePage({ id }: { id: string }) {
     }
   };
 
+  const publishStudentReview = () => {
+    const comment = studentComment.trim();
+    if (!comment) return;
+
+    const review: StudentReview = {
+      studentName: studentName.trim() || "Alumno de SkateMentor",
+      subtitle: "Alumno registrado",
+      avatarUrl: "/default-avatar.svg",
+      comment,
+      achievement: "Sesión compartida con la comunidad",
+      fullWidth: false,
+      rating: studentRating,
+    };
+
+    try {
+      const raw = localStorage.getItem(STUDENT_REVIEWS_KEY);
+      const reviews = raw
+        ? (JSON.parse(raw) as Record<string, StudentReview[]>)
+        : {};
+      const profileReviews = reviews[String(skaterId)] || [];
+      const updated = {
+        ...reviews,
+        [String(skaterId)]: [...profileReviews, review],
+      };
+      localStorage.setItem(STUDENT_REVIEWS_KEY, JSON.stringify(updated));
+      setStudentReviews(updated[String(skaterId)]);
+      setStudentComment("");
+    } catch {
+      window.alert("No se pudo guardar la reseña.");
+    }
+  };
+
   const combinedReviews = [
     ...skater.reviews,
     ...adminReviews,
+    ...studentReviews,
   ];
 
   return (
@@ -490,6 +559,31 @@ export default function SkaterProfilePage({ id }: { id: string }) {
                 {skater.galleryDescription}
               </p>
 
+              {(localVideoUrl || skater.socialVideoUrl) && (
+                <div className="mb-space-md">
+                  {localVideoUrl ? (
+                    <video
+                      className="w-full max-h-[420px] rounded-xl bg-inverse-surface object-contain"
+                      controls
+                      preload="metadata"
+                      src={localVideoUrl}
+                    />
+                  ) : (
+                    <a
+                      href={skater.socialVideoUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center gap-space-xs min-h-40 rounded-xl bg-surface-container hover:bg-surface-container-high text-primary font-headline-md text-headline-md transition-colors"
+                    >
+                      <span className="material-symbols-outlined text-[32px]">
+                        smart_display
+                      </span>
+                      Ver video de trucos
+                    </a>
+                  )}
+                </div>
+              )}
+
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-space-sm">
                 {skater.gallery.map((photo, index) => (
                   <div
@@ -622,6 +716,63 @@ export default function SkaterProfilePage({ id }: { id: string }) {
                         </button>
                       </div>
                     </label>
+                  </div>
+                </div>
+              )}
+
+              {isAuthenticated && !isAdmin && (
+                <div className="mb-space-md rounded-xl border border-secondary-container bg-surface-container-low p-space-md">
+                  <p className="font-label-md text-label-md font-bold text-on-surface">
+                    Comparte tu experiencia
+                  </p>
+                  <p className="font-body-sm text-body-sm text-secondary mt-1">
+                    Solo las cuentas registradas pueden publicar reseñas.
+                  </p>
+                  <div className="mt-space-sm grid grid-cols-1 md:grid-cols-[160px_1fr] gap-space-sm">
+                    <label className="flex flex-col gap-1 font-label-sm text-label-sm text-on-surface">
+                      Calificación
+                      <select
+                        value={studentRating}
+                        onChange={(event) =>
+                          setStudentRating(Number(event.target.value))
+                        }
+                        className="rounded-lg bg-surface-container-lowest px-3 py-2 font-body-md text-body-md"
+                      >
+                        {[5, 4, 3, 2, 1].map((rating) => (
+                          <option key={rating} value={rating}>
+                            {rating} estrella{rating !== 1 ? "s" : ""}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <div className="grid grid-cols-1 gap-space-xs">
+                      <input
+                        value={studentName}
+                        onChange={(event) => setStudentName(event.target.value)}
+                        placeholder="Tu nombre"
+                        className="rounded-lg bg-surface-container-lowest px-3 py-2 font-body-md text-body-md"
+                      />
+                      <div className="flex flex-col sm:flex-row gap-space-xs">
+                        <textarea
+                          value={studentComment}
+                          onChange={(event) =>
+                            setStudentComment(event.target.value)
+                          }
+                          maxLength={450}
+                          rows={2}
+                          placeholder="Cuenta tu experiencia con el skater..."
+                          className="min-h-10 flex-1 resize-none rounded-lg bg-surface-container-lowest px-3 py-2 font-body-md text-body-md"
+                        />
+                        <button
+                          type="button"
+                          disabled={!studentComment.trim()}
+                          onClick={publishStudentReview}
+                          className="rounded-lg bg-primary px-space-md py-2 text-on-primary font-label-md text-label-md disabled:opacity-50 cursor-pointer"
+                        >
+                          Publicar reseña
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}

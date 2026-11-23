@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { isAdminEmail } from "../../lib/auth";
 import type { SkaterProfile } from "../data/skaters";
+import { saveLocalVideo } from "../../lib/local-media";
 
 const REGISTERED_SKATERS_KEY = "skatementor_registered_skaters";
 
@@ -58,6 +59,8 @@ export default function NuevoSkaterPage() {
 
   const [fileName, setFileName] = useState<string | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>(DEFAULT_AVATAR);
+  const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [videoPreviewUrl, setVideoPreviewUrl] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
 
@@ -102,6 +105,21 @@ export default function NuevoSkaterPage() {
       }
     };
     reader.readAsDataURL(file);
+  };
+
+  const handleVideoSelect = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 30 * 1024 * 1024) {
+      window.alert("El clip no puede superar los 30 MB.");
+      e.target.value = "";
+      return;
+    }
+
+    setVideoFile(file);
+    if (videoPreviewUrl) URL.revokeObjectURL(videoPreviewUrl);
+    setVideoPreviewUrl(URL.createObjectURL(file));
   };
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
@@ -179,12 +197,18 @@ export default function NuevoSkaterPage() {
           )}`,
           whatsappScheduleUrl: `https://wa.me/${numericWhatsApp}`,
           imageUrl: previewUrl,
+          socialVideoUrl: socialVideoUrl.trim() || undefined,
         };
 
         localStorage.setItem(
           REGISTERED_SKATERS_KEY,
           JSON.stringify([...existing, newSkater])
         );
+        if (videoFile) {
+          saveLocalVideo(`skater-${nextId}`, videoFile).catch(() => {
+            window.alert("El perfil se guardó, pero el clip no pudo almacenarse.");
+          });
+        }
       } catch {
         setIsSubmitting(false);
         window.alert(
@@ -654,6 +678,50 @@ export default function NuevoSkaterPage() {
                   <span className="font-body-sm text-body-sm text-secondary">
                     Añadir tu contenido en acción duplica la tasa de contacto de alumnos.
                   </span>
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <label
+                    className="font-label-md text-label-md text-on-surface"
+                    htmlFor="videoInput"
+                  >
+                    Clip breve de skate{" "}
+                    <span className="text-secondary font-normal">(Opcional)</span>
+                  </label>
+                  <label
+                    className="relative rounded-xl border border-dashed border-outline-variant bg-surface-container-low p-space-md flex items-center gap-space-md cursor-pointer hover:bg-surface-container transition-colors"
+                    htmlFor="videoInput"
+                  >
+                    <input
+                      accept="video/mp4,video/webm"
+                      className="hidden"
+                      id="videoInput"
+                      name="skaterClip"
+                      type="file"
+                      onChange={handleVideoSelect}
+                    />
+                    <div className="w-10 h-10 shrink-0 rounded-lg bg-primary-fixed text-on-primary-fixed flex items-center justify-center">
+                      <span className="material-symbols-outlined">
+                        movie
+                      </span>
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-label-md text-label-md text-on-surface">
+                        {videoFile ? videoFile.name : "Subir un clip MP4 o WebM"}
+                      </p>
+                      <p className="font-body-sm text-body-sm text-secondary">
+                        Máximo 30 MB · recomendado: 15 segundos
+                      </p>
+                    </div>
+                  </label>
+                  {videoPreviewUrl && (
+                    <video
+                      className="w-full max-h-72 rounded-xl bg-inverse-surface object-contain"
+                      controls
+                      muted
+                      src={videoPreviewUrl}
+                    />
+                  )}
                 </div>
               </div>
 

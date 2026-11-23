@@ -4,8 +4,10 @@ import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { SKATERS, type SkaterProfile } from "./data/skaters";
 import { isAdminEmail } from "../lib/auth";
+import { deleteLocalVideo } from "../lib/local-media";
 
 const REGISTERED_SKATERS_KEY = "skatementor_registered_skaters";
+const HIDDEN_DEFAULT_SKATERS_KEY = "skatementor_hidden_default_skaters";
 
 const MODALITY_TABS = ["all", "Street", "Bowl", "Grind & Slide", "Park"];
 const QUICK_TAGS = ["Street", "Bowl", "Grind & Slide", "Park", "Freestyle"];
@@ -19,6 +21,7 @@ export default function CatalogoPage() {
   const [registeredSkaters, setRegisteredSkaters] = useState<SkaterProfile[]>([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [skaterToDelete, setSkaterToDelete] = useState<SkaterProfile | null>(null);
+  const [hiddenDefaultSkaters, setHiddenDefaultSkaters] = useState<number[]>([]);
 
   useEffect(() => {
     const session = document.cookie
@@ -44,21 +47,52 @@ export default function CatalogoPage() {
     } catch {
       setRegisteredSkaters([]);
     }
+
+    try {
+      const stored = localStorage.getItem(HIDDEN_DEFAULT_SKATERS_KEY);
+      setHiddenDefaultSkaters(
+        stored ? (JSON.parse(stored) as number[]) : []
+      );
+    } catch {
+      setHiddenDefaultSkaters([]);
+    }
   }, []);
 
   const deleteRegisteredSkater = (skater: SkaterProfile) => {
-    const updated = registeredSkaters.filter((item) => item.id !== skater.id);
-    localStorage.setItem(
-      REGISTERED_SKATERS_KEY,
-      JSON.stringify(updated)
-    );
-    setRegisteredSkaters(updated);
+    if (skater.id < 1000) {
+      const updated = [...new Set([...hiddenDefaultSkaters, skater.id])];
+      localStorage.setItem(
+        HIDDEN_DEFAULT_SKATERS_KEY,
+        JSON.stringify(updated)
+      );
+      setHiddenDefaultSkaters(updated);
+    } else {
+      const updated = registeredSkaters.filter((item) => item.id !== skater.id);
+      localStorage.setItem(
+        REGISTERED_SKATERS_KEY,
+        JSON.stringify(updated)
+      );
+      deleteLocalVideo(`skater-${skater.id}`).catch(() => undefined);
+      setRegisteredSkaters(updated);
+    }
     setSkaterToDelete(null);
+  };
+
+  const clearDemoCatalog = () => {
+    const demoIds = SKATERS.map((skater) => skater.id);
+    localStorage.setItem(
+      HIDDEN_DEFAULT_SKATERS_KEY,
+      JSON.stringify(demoIds)
+    );
+    setHiddenDefaultSkaters(demoIds);
   };
 
   const filteredSkaters = useMemo(() => {
     const query = searchQuery.toLowerCase().trim();
-    return [...SKATERS, ...registeredSkaters].filter((skater) => {
+    return [
+      ...SKATERS.filter((skater) => !hiddenDefaultSkaters.includes(skater.id)),
+      ...registeredSkaters,
+    ].filter((skater) => {
       const matchesQuery =
         !query ||
         skater.name.toLowerCase().includes(query) ||
@@ -99,6 +133,7 @@ export default function CatalogoPage() {
     selectedLevel,
     selectedPrice,
     registeredSkaters,
+    hiddenDefaultSkaters,
   ]);
 
   const scrollToCatalog = () => {
@@ -300,6 +335,18 @@ export default function CatalogoPage() {
                 Catálogo de Skaters
               </h2>
             </div>
+            {isAuthenticated && hiddenDefaultSkaters.length < SKATERS.length && (
+              <button
+                type="button"
+                onClick={clearDemoCatalog}
+                className="inline-flex items-center justify-center gap-space-xs rounded-lg border border-error/30 bg-error-container/60 px-space-md py-2 text-on-error-container font-label-md text-label-md hover:bg-error-container transition-colors cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-[18px]">
+                  delete_sweep
+                </span>
+                Limpiar catálogo demostrativo
+              </button>
+            )}
             <p className="font-body-sm text-body-sm text-secondary">
               Mostrando{" "}
               <span className="font-bold text-on-surface">

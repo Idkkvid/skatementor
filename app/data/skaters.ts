@@ -72,6 +72,8 @@ export interface SkaterProfile {
   whatsappUrl: string;
   whatsappScheduleUrl: string;
   imageUrl: string;
+  videoUrl?: string;
+  socialVideoUrl?: string;
 }
 
 export const SKATERS: SkaterProfile[] = [
