@@ -1,7 +1,9 @@
 "use client";
 
-import { useState, ChangeEvent, FormEvent } from "react";
+import { useEffect, useState, ChangeEvent, FormEvent } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { isValidAccountEmail } from "../../lib/auth";
 
 const DISCIPLINE_OPTIONS = [
   { value: "street", label: "Street", icon: "stairs" },
@@ -15,6 +17,8 @@ const DEFAULT_AVATAR =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuAKv4o8YklNlVIVdWT6vEbHL6CLScJ6F5HFvt8bEYiM3KfCj734yYJ_7YnVho4OucGKim6HyM0YRZVqb-_VFeUIsJJijrB6_N_5cNaAg6kspl4TdXcPoIvDy_EadHZAdZA6MY1C5RqA5NEcNYYIwzjXEgvjpDEUjIQ8x1k6_Cxd5RTiZ1svWz0eFAkz305PT-1vqgxFRW-q23nG5JvOahqJ1XavJMijJiQ2Fp99wnk";
 
 export default function NuevoSkaterPage() {
+  const router = useRouter();
+  const [isAuthorized, setIsAuthorized] = useState(false);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
@@ -34,6 +38,29 @@ export default function NuevoSkaterPage() {
   const [previewUrl, setPreviewUrl] = useState<string>(DEFAULT_AVATAR);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+
+  useEffect(() => {
+    const session = document.cookie
+      .split("; ")
+      .find((item) => item.startsWith("skatementor_session="))
+      ?.split("=")[1];
+
+    let authorized = false;
+    if (session) {
+      try {
+        authorized = isValidAccountEmail(decodeURIComponent(session));
+      } catch {
+        authorized = false;
+      }
+    }
+
+    if (!authorized) {
+      router.replace("/login?next=/nuevo-skater/");
+      return;
+    }
+
+    setIsAuthorized(true);
+  }, [router]);
 
   const toggleDiscipline = (value: string) => {
     setSelectedDisciplines((prev) =>
@@ -72,6 +99,16 @@ export default function NuevoSkaterPage() {
   const formattedPrice = hourlyRate
     ? `$${Number(hourlyRate).toLocaleString("es-CO")}`
     : "$45.000";
+
+  if (!isAuthorized) {
+    return (
+      <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center">
+        <p className="font-body-md text-body-md text-secondary">
+          Verificando sesión...
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col w-full">

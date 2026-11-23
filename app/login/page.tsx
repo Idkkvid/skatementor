@@ -18,7 +18,8 @@ export default function LoginPage() {
       correoUsuario
     )}; path=/; max-age=${maxAge}; SameSite=Lax`;
 
-    router.push("/");
+    const nextPath = new URL(window.location.href).searchParams.get("next");
+    router.push(nextPath === "/nuevo-skater" ? "/nuevo-skater/" : "/");
     router.refresh();
   };
 

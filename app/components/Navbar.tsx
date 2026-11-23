@@ -1,11 +1,34 @@
 "use client";
 
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { isValidAccountEmail } from "../../lib/auth";
 
 export default function Navbar() {
   const pathname = usePathname();
-  const isLoginPage = pathname === "/login";
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const isLoginPage = pathname === "/login" || pathname === "/login/";
+
+  useEffect(() => {
+    const session = document.cookie
+      .split("; ")
+      .find((item) => item.startsWith("skatementor_session="))
+      ?.split("=")[1];
+
+    if (!session) {
+      setIsAuthenticated(false);
+      return;
+    }
+
+    try {
+      setIsAuthenticated(isValidAccountEmail(decodeURIComponent(session)));
+    } catch {
+      setIsAuthenticated(false);
+    }
+  }, [pathname]);
 
   const handleLogout = () => {
     document.cookie = "skatementor_session=; path=/; max-age=0; SameSite=Lax";
@@ -42,28 +65,42 @@ export default function Navbar() {
             </nav>
 
             <div className="flex items-center gap-space-sm md:gap-space-md">
-              <Link
-                className="inline-flex items-center gap-space-xs bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md px-space-md py-space-sm rounded-lg transition-colors shadow-sm"
-                href="/nuevo-skater"
-              >
-                <span>Añadir Skater</span>
-                <span className="material-symbols-outlined text-[16px]">
-                  add
-                </span>
-              </Link>
+              {isAuthenticated ? (
+                <>
+                  <Link
+                    className="inline-flex items-center gap-space-xs bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md px-space-md py-space-sm rounded-lg transition-colors shadow-sm"
+                    href="/nuevo-skater"
+                  >
+                    <span>Añadir Skater</span>
+                    <span className="material-symbols-outlined text-[16px]">
+                      add
+                    </span>
+                  </Link>
 
-              <button
-                aria-label="Cerrar sesión"
-                className="inline-flex items-center gap-1.5 bg-surface-container hover:bg-error-container text-on-surface hover:text-on-error-container font-label-md text-label-md px-space-md py-space-sm rounded-lg transition-colors cursor-pointer"
-                title="Cerrar sesión"
-                type="button"
-                onClick={handleLogout}
-              >
-                <span className="material-symbols-outlined text-[18px]">
-                  logout
-                </span>
-                <span className="hidden sm:inline">Salir</span>
-              </button>
+                  <button
+                    aria-label="Cerrar sesión"
+                    className="inline-flex items-center gap-1.5 bg-surface-container hover:bg-error-container text-on-surface hover:text-on-error-container font-label-md text-label-md px-space-md py-space-sm rounded-lg transition-colors cursor-pointer"
+                    title="Cerrar sesión"
+                    type="button"
+                    onClick={handleLogout}
+                  >
+                    <span className="material-symbols-outlined text-[18px]">
+                      logout
+                    </span>
+                    <span className="hidden sm:inline">Salir</span>
+                  </button>
+                </>
+              ) : (
+                <Link
+                  className="inline-flex items-center gap-space-xs bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md px-space-md py-space-sm rounded-lg transition-colors shadow-sm"
+                  href="/login?next=/"
+                >
+                  <span>Iniciar sesión</span>
+                  <span className="material-symbols-outlined text-[18px]">
+                    login
+                  </span>
+                </Link>
+              )}
             </div>
           </>
         )}

@@ -518,9 +518,9 @@ export default function CatalogoPage() {
             <div className="z-10 flex flex-col sm:flex-row items-center gap-space-sm w-full md:w-auto shrink-0">
               <Link
                 className="w-full sm:w-auto px-space-lg py-3 bg-primary hover:bg-primary-container text-on-primary font-headline-md text-[16px] font-bold rounded-lg transition-all shadow-md text-center"
-                href="/nuevo-skater"
+                href="/login?next=/nuevo-skater"
               >
-                ¿Eres skater pro? Regístrate aquí
+                ¿Eres skater pro? Inicia sesión para registrarte
               </Link>
             </div>
           </div>
