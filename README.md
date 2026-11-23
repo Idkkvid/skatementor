@@ -36,6 +36,18 @@ Es un proyecto académico de Buenas Prácticas de Desarrollo de Software de la U
 
 > Actualmente no existe conexión activa con MySQL ni carga dinámica de fotos o videos a S3. Los perfiles y reseñas creados desde la interfaz se guardan en `localStorage`; los clips se guardan en IndexedDB del navegador. Por eso esos datos no se comparten entre dispositivos.
 
+## Despliegue en AWS y dominio personalizado
+
+La aplicación está disponible mediante el dominio personalizado **[skatementor.live](http://skatementor.live)**.
+
+El dominio fue adquirido en **name.com** y configurado con los nameservers de Amazon Route 53. Route 53 resuelve el dominio hacia la Elastic IP asociada a la instancia EC2. El tráfico llega al grupo de seguridad de la instancia, que autoriza el acceso web configurado.
+
+La instancia EC2 ejecuta el servidor web y recibe el contenido generado por GitHub Actions. Los recursos estáticos de Next.js se sincronizan con el bucket de Amazon S3. El despliegue se realiza mediante el flujo de GitHub Actions descrito en `.github/workflows/deploy.yml`.
+
+![Configuración del dominio skatementor.live en name.com](docs/evidencias/04-name-com-dominio.png)
+
+![Arquitectura de despliegue de SkateMentor en AWS](docs/evidencias/05-arquitectura-aws.png)
+
 ## Arquitectura actual
 
 El proyecto se construye como una aplicación estática. GitHub Actions genera la carpeta `out/`, sincroniza los recursos `out/_next` con S3 y copia el HTML al servidor EC2.
