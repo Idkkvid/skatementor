@@ -4,6 +4,9 @@ import { useEffect, useState, ChangeEvent, FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { isValidAccountEmail } from "../../lib/auth";
+import type { SkaterProfile } from "../data/skaters";
+
+const REGISTERED_SKATERS_KEY = "skatementor_registered_skaters";
 
 const DISCIPLINE_OPTIONS = [
   { value: "street", label: "Street", icon: "stairs" },
@@ -88,6 +91,83 @@ export default function NuevoSkaterPage() {
 
     setIsSubmitting(true);
     setTimeout(() => {
+      try {
+        const existingRaw = localStorage.getItem(REGISTERED_SKATERS_KEY);
+        const existing: SkaterProfile[] = existingRaw
+          ? (JSON.parse(existingRaw) as SkaterProfile[])
+          : [];
+        const nextId =
+          existing.length > 0
+            ? Math.max(...existing.map((skater) => skater.id)) + 1
+            : 1000;
+        const numericWhatsApp = whatsapp.replace(/\D/g, "");
+        const city = locationSpots.split(",")[0]?.trim() || "Colombia";
+        const normalizedDisciplines = selectedDisciplines.map((value) => {
+          const option = DISCIPLINE_OPTIONS.find((item) => item.value === value);
+          return (
+            option?.label
+              .replace(" / Rampa", "")
+              .replace(" Transition", "") || value
+          );
+        });
+
+        const newSkater: SkaterProfile = {
+          id: nextId,
+          mentorCode: `#SKM-${nextId}`,
+          name: fullName,
+          headline: normalizedDisciplines.join(", "),
+          experienceLabel: `${experienceYears || "Experiencia por confirmar"} de experiencia`,
+          experienceYearsText: experienceYears,
+          badgeTop: "Nuevo Instructor",
+          verifiedLabel: "Perfil publicado",
+          city,
+          countryCity: `${city}, Colombia`,
+          price: Number(hourlyRate),
+          priceFormatted: `$${Number(hourlyRate).toLocaleString("es-CO")}`,
+          responseTime: "Respuesta por WhatsApp",
+          rating: "Nuevo",
+          reviewsCount: 0,
+          modalities: normalizedDisciplines,
+          level: studentLevel,
+          recommendedLevels: studentLevel,
+          sessionDuration: "Horario por acordar",
+          sessionMode: "Clase personalizada",
+          bio,
+          aboutParagraphs: [bio],
+          metrics: {
+            hours: "Nuevo",
+            successLabel: "Perfil",
+            successValue: "Publicado",
+            injuries: "Por verificar",
+          },
+          tricks: [],
+          galleryCityLabel: city,
+          galleryDescription: locationSpots,
+          gallery: [],
+          reviews: [],
+          spotsIntro: locationSpots,
+          mapLocationQuery: locationSpots,
+          mapPreviewUrl: "",
+          spots: [],
+          whatsappUrl: `https://wa.me/${numericWhatsApp}?text=${encodeURIComponent(
+            `Hola ${fullName}, vi tu perfil en SkateMentor y me gustaría agendar una clase`
+          )}`,
+          whatsappScheduleUrl: `https://wa.me/${numericWhatsApp}`,
+          imageUrl: previewUrl,
+        };
+
+        localStorage.setItem(
+          REGISTERED_SKATERS_KEY,
+          JSON.stringify([...existing, newSkater])
+        );
+      } catch {
+        setIsSubmitting(false);
+        window.alert(
+          "No se pudo guardar el perfil. La foto puede ser demasiado grande."
+        );
+        return;
+      }
+
       setIsSubmitting(false);
       setIsSubmitted(true);
       document
@@ -141,7 +221,7 @@ export default function NuevoSkaterPage() {
                 Integración API Ready
               </span>
               <span className="font-headline-md text-headline-md text-on-surface">
-                REST + S3 Upload
+                Registro local beta
               </span>
             </div>
           </div>
@@ -441,7 +521,7 @@ export default function NuevoSkaterPage() {
                       Perfil y Presentación
                     </h2>
                     <p className="font-body-sm text-body-sm text-secondary">
-                      Describe tu enfoque didáctico y carga tu fotografía para almacenamiento en bucket S3.
+                      Describe tu enfoque didáctico y añade una fotografía de vista previa.
                     </p>
                   </div>
                 </div>
@@ -510,7 +590,7 @@ export default function NuevoSkaterPage() {
                       <span className="material-symbols-outlined text-[14px] text-tertiary">
                         lock
                       </span>
-                      <span>Subida optimizada directa a Amazon S3 Bucket</span>
+                      <span>Vista previa local (S3 pendiente)</span>
                     </div>
 
                     {fileName && (
@@ -585,7 +665,7 @@ export default function NuevoSkaterPage() {
                       <span className="material-symbols-outlined animate-spin text-[20px]">
                         progress_activity
                       </span>
-                      <span>Guardando en MySQL &amp; S3...</span>
+                      <span>Guardando perfil...</span>
                     </>
                   ) : isSubmitted ? (
                     <>
@@ -619,7 +699,7 @@ export default function NuevoSkaterPage() {
                       ¡Registro Exitoso!
                     </span>
                     <span className="font-body-sm text-body-sm">
-                      Tu información ha sido sincronizada con el motor MySQL y tu foto está en S3. Redirigiendo a tu perfil...
+                      Tu perfil quedó publicado en el catálogo de este navegador.
                     </span>
                   </div>
                 </div>

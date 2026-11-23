@@ -1,8 +1,11 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
-import { SKATERS } from "./data/skaters";
+import { SKATERS, type SkaterProfile } from "./data/skaters";
+import { isValidAccountEmail } from "../lib/auth";
+
+const REGISTERED_SKATERS_KEY = "skatementor_registered_skaters";
 
 const MODALITY_TABS = ["all", "Street", "Bowl", "Grind & Slide", "Park"];
 const QUICK_TAGS = ["Street", "Bowl", "Grind & Slide", "Park", "Freestyle"];
@@ -13,10 +16,49 @@ export default function CatalogoPage() {
   const [currentModality, setCurrentModality] = useState("all");
   const [selectedLevel, setSelectedLevel] = useState("all");
   const [selectedPrice, setSelectedPrice] = useState("all");
+  const [registeredSkaters, setRegisteredSkaters] = useState<SkaterProfile[]>([]);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [skaterToDelete, setSkaterToDelete] = useState<SkaterProfile | null>(null);
+
+  useEffect(() => {
+    const session = document.cookie
+      .split("; ")
+      .find((item) => item.startsWith("skatementor_session="))
+      ?.split("=")[1];
+
+    if (session) {
+      try {
+        setIsAuthenticated(
+          isValidAccountEmail(decodeURIComponent(session))
+        );
+      } catch {
+        setIsAuthenticated(false);
+      }
+    }
+
+    try {
+      const stored = localStorage.getItem(REGISTERED_SKATERS_KEY);
+      setRegisteredSkaters(
+        stored ? (JSON.parse(stored) as SkaterProfile[]) : []
+      );
+    } catch {
+      setRegisteredSkaters([]);
+    }
+  }, []);
+
+  const deleteRegisteredSkater = (skater: SkaterProfile) => {
+    const updated = registeredSkaters.filter((item) => item.id !== skater.id);
+    localStorage.setItem(
+      REGISTERED_SKATERS_KEY,
+      JSON.stringify(updated)
+    );
+    setRegisteredSkaters(updated);
+    setSkaterToDelete(null);
+  };
 
   const filteredSkaters = useMemo(() => {
     const query = searchQuery.toLowerCase().trim();
-    return SKATERS.filter((skater) => {
+    return [...SKATERS, ...registeredSkaters].filter((skater) => {
       const matchesQuery =
         !query ||
         skater.name.toLowerCase().includes(query) ||
@@ -48,7 +90,14 @@ export default function CatalogoPage() {
         matchesPrice
       );
     });
-  }, [searchQuery, selectedCity, currentModality, selectedLevel, selectedPrice]);
+  }, [
+    searchQuery,
+    selectedCity,
+    currentModality,
+    selectedLevel,
+    selectedPrice,
+    registeredSkaters,
+  ]);
 
   const scrollToCatalog = () => {
     document
@@ -397,12 +446,32 @@ export default function CatalogoPage() {
                       </svg>
                       <span>Contactar por WhatsApp</span>
                     </a>
-                    <Link
-                      className="w-full bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md py-2 rounded-lg transition-colors text-center"
-                      href={`/skater/${skater.id}`}
-                    >
-                      Ver Perfil Completo
-                    </Link>
+                    {skater.id < 1000 ? (
+                      <Link
+                        className="w-full bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md py-2 rounded-lg transition-colors text-center"
+                        href={`/skater/${skater.id}`}
+                      >
+                        Ver Perfil Completo
+                      </Link>
+                    ) : (
+                      <>
+                        <div className="w-full bg-surface-container text-on-surface-variant font-label-md text-label-md py-2 rounded-lg text-center">
+                          Perfil nuevo publicado
+                        </div>
+                        {isAuthenticated && (
+                          <button
+                            className="w-full inline-flex items-center justify-center gap-space-xs border border-error/30 bg-error-container/70 text-on-error-container hover:bg-error-container hover:border-error/50 font-label-md text-label-md py-2.5 rounded-xl transition-all cursor-pointer shadow-sm"
+                            type="button"
+                            onClick={() => setSkaterToDelete(skater)}
+                          >
+                            <span className="material-symbols-outlined text-[19px]">
+                              delete
+                            </span>
+                            Eliminar skater
+                          </button>
+                        )}
+                      </>
+                    )}
                   </div>
                 </article>
               ))}
@@ -526,6 +595,56 @@ export default function CatalogoPage() {
           </div>
         </div>
       </section>
+
+      {skaterToDelete && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-inverse-surface/60 backdrop-blur-sm px-gutter-mobile"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="delete-skater-title"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) setSkaterToDelete(null);
+          }}
+        >
+          <div className="w-full max-w-md rounded-2xl bg-surface-container-lowest p-space-lg shadow-2xl border border-outline-variant">
+            <div className="flex items-start gap-space-md">
+              <div className="w-12 h-12 shrink-0 rounded-full bg-error-container flex items-center justify-center text-on-error-container">
+                <span className="material-symbols-outlined">delete_forever</span>
+              </div>
+              <div>
+                <h3
+                  id="delete-skater-title"
+                  className="font-headline-md text-headline-md text-on-surface font-bold"
+                >
+                  ¿Eliminar a {skaterToDelete.name}?
+                </h3>
+                <p className="font-body-sm text-body-sm text-secondary mt-1">
+                  Esta acción quitará el perfil del catálogo de este navegador.
+                </p>
+              </div>
+            </div>
+            <div className="mt-space-lg flex flex-col-reverse sm:flex-row sm:justify-end gap-space-sm">
+              <button
+                className="px-space-md py-2.5 rounded-xl border border-outline-variant text-on-surface font-label-md text-label-md hover:bg-surface-container transition-colors cursor-pointer"
+                type="button"
+                onClick={() => setSkaterToDelete(null)}
+              >
+                Cancelar
+              </button>
+              <button
+                className="inline-flex items-center justify-center gap-space-xs px-space-md py-2.5 rounded-xl bg-error text-on-error hover:opacity-90 font-label-md text-label-md transition-opacity cursor-pointer"
+                type="button"
+                onClick={() => deleteRegisteredSkater(skaterToDelete)}
+              >
+                <span className="material-symbols-outlined text-[18px]">
+                  delete
+                </span>
+                Eliminar definitivamente
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -35,7 +35,7 @@ En esta primera versión, el contacto se realiza **fuera de la aplicación**, po
 | **PM2** | Administración y reinicio del proceso de Next.js en el servidor. |
 | **Amazon EC2 (`t3.micro`)** | Servidor de aplicación en AWS. |
 | **Amazon EBS (`gp3`, 20 GB)** | Disco de la instancia, donde también reside MySQL. |
-| **Amazon S3** | Almacenamiento de fotografías de skaters y recursos estáticos. |
+| **Amazon S3** | Servidor de recursos estáticos Next.js (`/_next/static`). Las fotografías dinámicas de nuevos skaters todavía están pendientes de integración. |
 | **Amazon VPC + subred pública + Security Group** | Red virtual y reglas de acceso a EC2. |
 | **Elastic IP + Amazon Route 53** | Dirección IPv4 fija y resolución DNS del dominio. |
 | **Git, GitHub y GitHub Actions** | Versionamiento colaborativo, integración continua y despliegue mediante SSH. |
@@ -260,13 +260,13 @@ flowchart TD
     IP --> SG[Security Group: HTTP 80]
     SG --> APP[EC2 t3.micro: Next.js + Node.js + PM2]
     APP --> DB[(MySQL local / EBS gp3)]
-    APP --> S3[(Amazon S3: fotos y estáticos)]
+    APP --> S3[(Amazon S3: recursos estáticos; fotos pendientes)]
     APP --> C[Enlace de contacto externo]
     C --> M[WhatsApp o correo]
     GH[GitHub Actions] -->|Build y despliegue SSH| APP
 ```
 
-La aplicación sirve la interfaz y obtiene la información de perfiles de su capa de datos según la implementación real; MySQL permanece dentro de EC2, mientras que S3 guarda las imágenes. El contacto se abre hacia servicios externos. **El APA describe esta arquitectura como propuesta; los nombres concretos de rutas y funciones se deben validar contra el código.**
+La aplicación sirve la interfaz desplegada en EC2 y entrega sus recursos estáticos desde S3 según el workflow actual. Los perfiles iniciales residen en el código y los perfiles añadidos desde el formulario se guardan temporalmente en `localStorage`; todavía no existe persistencia compartida en MySQL ni carga dinámica de fotos a S3. El contacto se abre hacia servicios externos.
 
 ## Arquitectura del proyecto
 
@@ -274,7 +274,7 @@ La aplicación sirve la interfaz y obtiene la información de perfiles de su cap
 
 *Figura 1. Diagrama original de la propuesta APA de SkateMentor (noviembre de 2026).*
 
-La arquitectura se concentra en una sola EC2 `t3.micro` para reducir costos. La instancia está en una subred pública dentro de una VPC y recibe tráfico mediante Elastic IP. Route 53 asocia el dominio con esa IP; el Security Group controla los puertos de entrada; Node.js sirve Next.js, PM2 mantiene el proceso en ejecución y MySQL funciona en el propio servidor. Amazon S3 almacena fotografías y GitHub Actions coordina el build y el deploy por SSH.
+La arquitectura se concentra en una sola EC2 `t3.micro` para reducir costos. La instancia está en una subred pública dentro de una VPC y recibe tráfico mediante Elastic IP. Route 53 asocia el dominio con esa IP; el Security Group controla los puertos de entrada; Node.js sirve Next.js y GitHub Actions coordina el build y el deploy por SSH. Amazon S3 aloja actualmente los recursos estáticos de Next.js. MySQL y la carga persistente de fotografías dinámicas son componentes previstos pero aún no están conectados al flujo real del registro.
 
 **Alcance de la propuesta:** no utiliza balanceador de carga, Auto Scaling ni Amazon RDS; tampoco contempla Docker o un NAT Gateway en la arquitectura representada. El documento excluye HTTPS en esta primera fase. El diseño está orientado a un ejercicio académico de bajo costo, no a una infraestructura de producción con alta disponibilidad.
 
