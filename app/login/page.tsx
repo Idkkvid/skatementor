@@ -19,7 +19,11 @@ export default function LoginPage() {
     )}; path=/; max-age=${maxAge}; SameSite=Lax`;
 
     const nextPath = new URL(window.location.href).searchParams.get("next");
-    router.push(nextPath === "/nuevo-skater" ? "/nuevo-skater/" : "/");
+    const normalizedNextPath =
+      nextPath?.replace(/\/+$/, "") === "/nuevo-skater"
+        ? "/nuevo-skater/"
+        : "/";
+    router.push(normalizedNextPath);
     router.refresh();
   };
 
