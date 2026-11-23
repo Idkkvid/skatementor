@@ -40,7 +40,7 @@ Es un proyecto académico de Buenas Prácticas de Desarrollo de Software de la U
 
 La aplicación está disponible mediante el dominio personalizado **[skatementor.live](http://skatementor.live)**.
 
-El dominio fue adquirido en **name.com** y configurado con los nameservers de Amazon Route 53. Route 53 resuelve el dominio hacia la Elastic IP asociada a la instancia EC2. El tráfico llega al grupo de seguridad de la instancia, que autoriza el acceso web configurado.
+El dominio fue adquirido en **name.com** y configurado con los nameservers de Amazon Route 53. Route 53 resuelve el dominio hacia la dirección IPv4 pública asociada a la instancia EC2. El tráfico llega al grupo de seguridad de la instancia, que autoriza el acceso web configurado.
 
 La instancia EC2 ejecuta el servidor web y recibe el contenido generado por GitHub Actions. Los recursos estáticos de Next.js se sincronizan con el bucket de Amazon S3. El despliegue se realiza mediante el flujo de GitHub Actions descrito en `.github/workflows/deploy.yml`.
 
