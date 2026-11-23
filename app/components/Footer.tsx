@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { isValidAccountEmail } from "../../lib/auth";
+import { isAdminEmail } from "../../lib/auth";
 
 export default function Footer() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -19,7 +19,7 @@ export default function Footer() {
     }
 
     try {
-      setIsAuthenticated(isValidAccountEmail(decodeURIComponent(session)));
+      setIsAuthenticated(isAdminEmail(decodeURIComponent(session)));
     } catch {
       setIsAuthenticated(false);
     }

@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { SKATERS, type SkaterProfile } from "./data/skaters";
-import { isValidAccountEmail } from "../lib/auth";
+import { isAdminEmail } from "../lib/auth";
 
 const REGISTERED_SKATERS_KEY = "skatementor_registered_skaters";
 
@@ -29,7 +29,7 @@ export default function CatalogoPage() {
     if (session) {
       try {
         setIsAuthenticated(
-          isValidAccountEmail(decodeURIComponent(session))
+          isAdminEmail(decodeURIComponent(session))
         );
       } catch {
         setIsAuthenticated(false);
@@ -407,7 +407,7 @@ export default function CatalogoPage() {
                             {skater.priceFormatted}
                           </div>
                           <span className="font-label-sm text-label-sm text-secondary uppercase">
-                            COP / h
+                            COP / sesión
                           </span>
                         </div>
                       </div>
@@ -528,7 +528,7 @@ export default function CatalogoPage() {
                 Elige tu instructor
               </h3>
               <p className="font-body-sm text-body-sm text-secondary">
-                Explora perfiles detallados, fotos de spots, especialidades (Street, Bowl o Grind) y tarifas por hora según tu ciudad.
+                Explora perfiles detallados, fotos de spots, especialidades (Street, Bowl o Grind) y tarifas por sesión según tu ciudad.
               </p>
               <div className="mt-auto pt-space-xs flex items-center gap-1 text-primary font-label-sm text-label-sm">
                 <span>Filtros instantáneos</span>

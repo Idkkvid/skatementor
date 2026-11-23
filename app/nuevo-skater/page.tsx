@@ -3,7 +3,7 @@
 import { useEffect, useState, ChangeEvent, FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { isValidAccountEmail } from "../../lib/auth";
+import { isAdminEmail } from "../../lib/auth";
 import type { SkaterProfile } from "../data/skaters";
 
 const REGISTERED_SKATERS_KEY = "skatementor_registered_skaters";
@@ -16,8 +16,7 @@ const DISCIPLINE_OPTIONS = [
   { value: "basic", label: "Trucos Básicos / Ollie", icon: "accessibility_new" },
 ];
 
-const DEFAULT_AVATAR =
-  "https://lh3.googleusercontent.com/aida-public/AB6AXuAKv4o8YklNlVIVdWT6vEbHL6CLScJ6F5HFvt8bEYiM3KfCj734yYJ_7YnVho4OucGKim6HyM0YRZVqb-_VFeUIsJJijrB6_N_5cNaAg6kspl4TdXcPoIvDy_EadHZAdZA6MY1C5RqA5NEcNYYIwzjXEgvjpDEUjIQ8x1k6_Cxd5RTiZ1svWz0eFAkz305PT-1vqgxFRW-q23nG5JvOahqJ1XavJMijJiQ2Fp99wnk";
+const DEFAULT_AVATAR = "/default-avatar.svg";
 
 const EXPERIENCE_LABELS: Record<string, string> = {
   "1-3": "1 a 3 años",
@@ -71,7 +70,7 @@ export default function NuevoSkaterPage() {
     let authorized = false;
     if (session) {
       try {
-        authorized = isValidAccountEmail(decodeURIComponent(session));
+        authorized = isAdminEmail(decodeURIComponent(session));
       } catch {
         authorized = false;
       }
@@ -401,7 +400,7 @@ export default function NuevoSkaterPage() {
                       Características y Especialidad
                     </h2>
                     <p className="font-body-sm text-body-sm text-secondary">
-                      Define tus disciplinas fuertes, target de alumnos y el valor por hora de instrucción.
+                      Define tus disciplinas fuertes, el público que puedes atender y el valor por sesión.
                     </p>
                   </div>
                 </div>
@@ -511,7 +510,7 @@ export default function NuevoSkaterPage() {
                       className="font-label-md text-label-md text-on-surface"
                       htmlFor="hourlyRate"
                     >
-                      Tarifa por hora (COP){" "}
+                      Tarifa por sesión (COP){" "}
                       <span className="text-primary">*</span>
                     </label>
                     <div className="relative flex items-center">

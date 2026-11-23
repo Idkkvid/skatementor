@@ -2,7 +2,10 @@
 
 import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { VALID_ACCOUNTS } from "../../lib/auth";
+import {
+  getValidAccounts,
+  type StoredContactAccount,
+} from "../../lib/auth";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -11,6 +14,11 @@ export default function LoginPage() {
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+  const [showCreateAccount, setShowCreateAccount] = useState(false);
+  const [newName, setNewName] = useState("");
+  const [newEmail, setNewEmail] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [successMsg, setSuccessMsg] = useState("");
 
   const iniciarSesionYEntrar = (correoUsuario: string) => {
     const maxAge = rememberMe ? 60 * 60 * 24 * 7 : 60 * 60 * 4;
@@ -32,7 +40,7 @@ export default function LoginPage() {
     setErrorMsg("");
 
     const correoNormalizado = email.trim().toLowerCase();
-    const usuarioAutorizado = VALID_ACCOUNTS.find(
+    const usuarioAutorizado = getValidAccounts().find(
       (cred) =>
         cred.email.toLowerCase() === correoNormalizado &&
         cred.password === password
@@ -44,6 +52,47 @@ export default function LoginPage() {
     }
 
     iniciarSesionYEntrar(usuarioAutorizado.email);
+  };
+
+  const handleCreateAccount = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setErrorMsg("");
+    setSuccessMsg("");
+
+    const normalizedEmail = newEmail.trim().toLowerCase();
+    if (getValidAccounts().some((account) =>
+      account.email.toLowerCase() === normalizedEmail
+    )) {
+      setErrorMsg("Ya existe una cuenta con ese correo.");
+      return;
+    }
+
+    const account: StoredContactAccount = {
+      email: normalizedEmail,
+      password: newPassword,
+      name: newName.trim(),
+      role: "student",
+    };
+
+    try {
+      const stored = localStorage.getItem("skatementor_contact_accounts");
+      const accounts = stored
+        ? (JSON.parse(stored) as StoredContactAccount[])
+        : [];
+      localStorage.setItem(
+        "skatementor_contact_accounts",
+        JSON.stringify([...accounts, account])
+      );
+      setEmail(normalizedEmail);
+      setPassword("");
+      setNewName("");
+      setNewEmail("");
+      setNewPassword("");
+      setShowCreateAccount(false);
+      setSuccessMsg("Cuenta creada. Ahora puedes iniciar sesión.");
+    } catch {
+      setErrorMsg("No se pudo crear la cuenta en este navegador.");
+    }
   };
   return (
     <div className="flex flex-col w-full">
@@ -151,6 +200,18 @@ export default function LoginPage() {
                 </div>
               )}
 
+              {successMsg && (
+                <div
+                  className="mb-space-md p-space-sm rounded-lg bg-tertiary-container text-on-tertiary-container font-body-sm text-body-sm flex items-center gap-2"
+                  role="status"
+                >
+                  <span className="material-symbols-outlined text-[18px]">
+                    check_circle
+                  </span>
+                  <span>{successMsg}</span>
+                </div>
+              )}
+
               {/* Credential Login Form */}
               <form className="flex flex-col gap-space-md" onSubmit={handleSubmit}>
                 <div className="flex flex-col gap-1.5">
@@ -251,6 +312,62 @@ export default function LoginPage() {
                   </span>
                 </button>
               </form>
+ 
+              <div className="mt-space-md pt-space-md border-t border-surface-container">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowCreateAccount((current) => !current);
+                    setErrorMsg("");
+                    setSuccessMsg("");
+                  }}
+                  className="w-full inline-flex items-center justify-center gap-space-xs rounded-lg border border-primary/30 text-primary hover:bg-primary-fixed px-space-md py-2.5 font-label-md text-label-md transition-colors cursor-pointer"
+                >
+                  <span className="material-symbols-outlined text-[18px]">
+                    person_add
+                  </span>
+                  Crear cuenta para contactar skaters
+                </button>
+
+                {showCreateAccount && (
+                  <form
+                    className="mt-space-md grid grid-cols-1 gap-space-sm"
+                    onSubmit={handleCreateAccount}
+                  >
+                    <input
+                      required
+                      type="text"
+                      value={newName}
+                      onChange={(event) => setNewName(event.target.value)}
+                      placeholder="Nombre completo"
+                      className="w-full rounded-lg bg-surface px-3.5 py-2.5 font-body-md text-body-md focus:outline-none focus:ring-2 focus:ring-primary"
+                    />
+                    <input
+                      required
+                      type="email"
+                      value={newEmail}
+                      onChange={(event) => setNewEmail(event.target.value)}
+                      placeholder="Correo electrónico"
+                      className="w-full rounded-lg bg-surface px-3.5 py-2.5 font-body-md text-body-md focus:outline-none focus:ring-2 focus:ring-primary"
+                    />
+                    <input
+                      required
+                      minLength={6}
+                      type="password"
+                      value={newPassword}
+                      onChange={(event) => setNewPassword(event.target.value)}
+                      placeholder="Contraseña (mínimo 6 caracteres)"
+                      className="w-full rounded-lg bg-surface px-3.5 py-2.5 font-body-md text-body-md focus:outline-none focus:ring-2 focus:ring-primary"
+                    />
+                    <button
+                      type="submit"
+                      className="rounded-lg bg-primary px-space-md py-2.5 text-on-primary font-label-md text-label-md cursor-pointer"
+                    >
+                      Crear cuenta
+                    </button>
+                  </form>
+                )}
+              </div>
             </div>
 
             <div className="mt-space-lg pt-space-md text-center">

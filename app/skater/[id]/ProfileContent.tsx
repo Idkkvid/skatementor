@@ -8,7 +8,7 @@ import {
   type StudentReview,
 } from "../../data/skaters";
 import {
-  isValidAccountEmail,
+  isAdminEmail,
   VALID_ACCOUNTS,
 } from "../../../lib/auth";
 
@@ -62,7 +62,7 @@ export default function SkaterProfilePage({ id }: { id: string }) {
       const account = VALID_ACCOUNTS.find(
         (item) => item.email.toLowerCase() === email.trim().toLowerCase()
       );
-      setIsAdmin(isValidAccountEmail(email));
+      setIsAdmin(isAdminEmail(email));
       setAdminName(
         account?.email === "vidal@skatementor.com"
           ? "Vidal Niebles"
@@ -303,14 +303,14 @@ export default function SkaterProfilePage({ id }: { id: string }) {
             <div className="flex flex-col sm:flex-row md:flex-col items-stretch sm:items-center md:items-end justify-between w-full md:w-auto gap-space-md bg-surface-container p-space-md rounded-xl md:bg-transparent md:p-0">
               <div className="text-left md:text-right">
                 <span className="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant block">
-                  Tarifa por Hora
+                  Tarifa por Sesión
                 </span>
                 <div className="flex items-baseline gap-1 md:justify-end">
                   <span className="font-headline-lg text-headline-lg text-primary font-bold tracking-tight">
                     {skater.priceFormatted}
                   </span>
                   <span className="font-body-sm text-body-sm font-medium text-secondary">
-                    COP / h
+                    COP / sesión
                   </span>
                 </div>
                 <span className="font-body-sm text-body-sm text-tertiary flex items-center gap-0.5 md:justify-end">

@@ -3,11 +3,12 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { isValidAccountEmail } from "../../lib/auth";
+import { isAdminEmail, isValidAccountEmail } from "../../lib/auth";
 
 export default function Navbar() {
   const pathname = usePathname();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const isLoginPage = pathname === "/login" || pathname === "/login/";
 
   useEffect(() => {
@@ -18,11 +19,13 @@ export default function Navbar() {
 
     if (!session) {
       setIsAuthenticated(false);
+      setIsAdmin(false);
       return;
     }
 
     try {
       setIsAuthenticated(isValidAccountEmail(decodeURIComponent(session)));
+      setIsAdmin(isAdminEmail(decodeURIComponent(session)));
     } catch {
       setIsAuthenticated(false);
     }
@@ -65,15 +68,17 @@ export default function Navbar() {
             <div className="flex items-center gap-space-sm md:gap-space-md">
               {isAuthenticated ? (
                 <>
-                  <Link
-                    className="inline-flex items-center gap-space-xs bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md px-space-md py-space-sm rounded-lg transition-colors shadow-sm"
-                    href="/nuevo-skater"
-                  >
-                    <span>Añadir Skater</span>
-                    <span className="material-symbols-outlined text-[16px]">
-                      add
-                    </span>
-                  </Link>
+                  {isAdmin && (
+                    <Link
+                      className="inline-flex items-center gap-space-xs bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md px-space-md py-space-sm rounded-lg transition-colors shadow-sm"
+                      href="/nuevo-skater"
+                    >
+                      <span>Añadir Skater</span>
+                      <span className="material-symbols-outlined text-[16px]">
+                        add
+                      </span>
+                    </Link>
+                  )}
 
                   <button
                     aria-label="Cerrar sesión"
