@@ -1,92 +1,73 @@
-<h1 align="center">SkateMentor 🛹</h1>
+# SkateMentor 🛹
 
-<p align="center">Encuentra skaters que dan clases y contáctalos directamente.</p>
+Plataforma web para encontrar skaters que ofrecen clases y contactarlos directamente.
 
-<p align="center">
-  <img alt="Next.js" src="https://img.shields.io/badge/Next.js-000000?logo=nextdotjs&logoColor=white">
-  <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white">
-  <img alt="Tailwind CSS" src="https://img.shields.io/badge/Tailwind_CSS-06B6D4?logo=tailwindcss&logoColor=white">
-  <img alt="AWS" src="https://img.shields.io/badge/AWS-FF9900?logo=amazonwebservices&logoColor=white">
-</p>
-
-<p align="center">
-  <img src="docs/evidencias/01-landing.png" alt="Página de inicio de SkateMentor" width="850">
-</p>
-
-<p align="center">🌐 <b><a href="http://skatementor.live">skatementor.live</a></b></p>
-
----
-
-## Contenido
-
-- [Sobre el proyecto](#sobre-el-proyecto)
-- [Cómo funciona](#cómo-funciona)
-- [Tecnologías](#tecnologías)
-- [Arquitectura](#arquitectura)
-- [Estructura de carpetas](#estructura-de-carpetas)
-- [Instalación local](#instalación-local)
-- [Aplicación en producción](#aplicación-en-producción)
-- [Evidencias](#evidencias)
-- [Equipo](#equipo)
-
----
+![Next.js](https://img.shields.io/badge/Next.js-000000?logo=nextdotjs&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-06B6D4?logo=tailwindcss&logoColor=white)
+![AWS](https://img.shields.io/badge/AWS-FF9900?logo=amazonwebservices&logoColor=white)
 
 ## Sobre el proyecto
 
-SkateMentor es un catálogo web de skaters con experiencia (street, bowl, grind, slide). La persona compara perfiles y contacta al skater por WhatsApp o correo.
+SkateMentor permite explorar perfiles de instructores de skate, consultar sus disciplinas, experiencia y tarifa por sesión, y contactarlos por WhatsApp. No incluye pagos ni reservas dentro de la aplicación.
 
-> Esta versión no incluye pagos ni reservas.
+Es un proyecto académico de Buenas Prácticas de Desarrollo de Software de la Universidad de la Costa (CUC), realizado por Vidal Niebles Cáceres y Mateo Pérez Núñez.
 
-Proyecto de **Buenas Prácticas de Desarrollo de Software**, Universidad de la Costa (CUC), 2026.
+## Funcionalidades
 
-## Cómo funciona
-
-1. Entra a la página de inicio.
-2. Explora el catálogo de skaters.
-3. Abre un perfil.
-4. Toca el botón de contacto (WhatsApp o correo).
-5. Coordina la clase directamente con el skater.
-
-| Catálogo | Perfil y contacto |
-| :---: | :---: |
-| <img src="docs/evidencias/03-catalogo.png" alt="Catálogo de skaters" width="400"> | <img src="docs/evidencias/04-perfil.png" alt="Perfil con botón de contacto" width="400"> |
+- Catálogo de skaters con búsqueda por nombre, ciudad, nivel y modalidad.
+- Perfiles completos con experiencia, preferencias de clase, galería, reseñas y contacto.
+- Registro de nuevos perfiles para cuentas administrativas.
+- Cuentas públicas para contactar y publicar reseñas como alumno.
+- Verificación y reseñas administrativas.
+- Avatar predeterminado para perfiles y reseñas.
+- Clip opcional de presentación en formato MP4 o WebM.
+- Almacenamiento local de perfiles, reseñas y clips en el navegador.
 
 ## Tecnologías
 
-| Área | Herramientas |
-| --- | --- |
-| Aplicación | Next.js, React, TypeScript, Tailwind CSS |
-| Servidor | Node.js, MySQL |
-| Nube (AWS) | EC2, S3, Route 53 |
-| Flujo de trabajo | Git, GitHub, GitHub Actions |
+- Next.js 16 y React 19.
+- TypeScript.
+- Tailwind CSS.
+- Node.js y npm.
+- Exportación estática con `output: "export"`.
+- GitHub Actions para construir y desplegar.
+- AWS EC2 para servir la aplicación y S3 para los recursos estáticos de Next.js.
 
-## Arquitectura
+> Actualmente no existe conexión activa con MySQL ni carga dinámica de fotos o videos a S3. Los perfiles y reseñas creados desde la interfaz se guardan en `localStorage`; los clips se guardan en IndexedDB del navegador. Por eso esos datos no se comparten entre dispositivos.
 
-<p align="center">
-  <img src="docs/arquitectura/skatementor-aws.png" alt="Arquitectura en AWS" width="850">
-</p>
+## Arquitectura actual
 
-- Todo corre en una sola EC2 `t3.micro`.
-- Route 53 apunta el dominio a una Elastic IP.
-- El Security Group filtra el tráfico.
-- S3 guarda los archivos estáticos de la aplicación (CSS, JavaScript y fuentes de `_next`).
-- Las fotos de los skaters viven en `public/` y se sirven desde la EC2.
-- Sin balanceador, Auto Scaling, RDS ni HTTPS en esta fase.
+El proyecto se construye como una aplicación estática. GitHub Actions genera la carpeta `out/`, sincroniza los recursos `out/_next` con S3 y copia el HTML al servidor EC2.
+
+```text
+Usuario
+   │
+   ▼
+EC2 ── sirve el HTML exportado
+ │
+ └── S3 ── recursos estáticos de Next.js (/_next)
+
+Navegador
+ ├── localStorage ── perfiles, cuentas, reseñas y preferencias
+ └── IndexedDB ───── clips locales de los skaters
+```
+
+La integración futura con MySQL, autenticación segura y almacenamiento compartido en S3 requerirá reemplazar la exportación estática por un backend persistente.
 
 ## Estructura de carpetas
 
 ```text
 skatementor/
-├── .github/workflows/   # CI/CD (build y deploy)
-├── app/                 # Páginas y rutas de Next.js
-├── public/              # Imágenes y recursos estáticos
-├── docs/                # Diagrama y capturas
-├── next.config.ts
-├── package.json
+├── .github/workflows/       # Flujo de construcción y despliegue
+├── app/                     # Páginas, componentes y datos de Next.js
+├── lib/                     # Autenticación y almacenamiento local de clips
+├── public/                  # Recursos públicos, incluido el avatar predeterminado
+├── docs/evidencias/         # Capturas de la aplicación
+├── next.config.ts           # Configuración de exportación estática
+├── package.json             # Scripts y dependencias
 └── README.md
 ```
-
-
 
 ## Instalación local
 
@@ -99,27 +80,25 @@ npm run dev
 
 Abre <http://localhost:3000>.
 
-Para generar el build de producción:
+Para validar la compilación de producción:
 
 ```bash
 npm run build
 ```
 
-## Aplicación en producción
+## Evidencias de funcionamiento
 
-🔗 <http://skatementor.live>: dominio `.live` en Route 53, apuntando a la Elastic IP de la EC2.
+### Inicio de sesión
 
-<p align="center">
-  <img src="docs/evidencias/02-dominio-publico.png" alt="SkateMentor abierto en skatementor.live" width="800">
-</p>
+![Inicio de sesión en SkateMentor](docs/evidencias/01-inicio-sesion.png)
 
-## Evidencias
+### Catálogo de skaters
 
-| GitHub Actions |
-| :---: |
-| <img src="docs/evidencias/05-actions.png" alt="Build y Deploy exitosos" width="500"> |
+![Catálogo de skaters](docs/evidencias/02-catalogo.png)
 
+### Registro de nuevo skater
 
+![Formulario para publicar un nuevo skater](docs/evidencias/03-nuevo-skater.png)
 
 ## Equipo
 
@@ -128,8 +107,6 @@ npm run build
 | Vidal Niebles Cáceres | Ingeniería de Sistemas |
 | Mateo Pérez Núñez | Ingeniería de Sistemas |
 
-**Docente:** Kelly Villa Collazos
-
----
-
-<p align="center"><sub>SkateMentor · CUC · Ingeniería de Sistemas · 2026</sub></p>
+**Docente:** Kelly Villa Collazos  
+**Institución:** Universidad de la Costa (CUC)  
+**Año:** 2026
