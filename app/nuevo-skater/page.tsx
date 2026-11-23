@@ -751,7 +751,7 @@ export default function NuevoSkaterPage() {
                       <span className="material-symbols-outlined animate-spin text-[20px]">
                         progress_activity
                       </span>
-                      <span>Guardando perfil...</span>
+                      <span>Guardando en este navegador...</span>
                     </>
                   ) : isSubmitted ? (
                     <>
@@ -782,7 +782,7 @@ export default function NuevoSkaterPage() {
                   </span>
                   <div className="flex flex-col">
                     <span className="font-headline-md text-headline-md font-bold">
-                      ¡Registro Exitoso!
+                      ¡Perfil guardado localmente!
                     </span>
                     <span className="font-body-sm text-body-sm">
                       Tu perfil quedó publicado en el catálogo de este navegador.
