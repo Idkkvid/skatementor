@@ -1,14 +1,34 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { SKATERS } from "../../data/skaters";
+import { SKATERS, type SkaterProfile } from "../../data/skaters";
+
+const REGISTERED_SKATERS_KEY = "skatementor_registered_skaters";
 
 export default function SkaterProfilePage({ id }: { id: string }) {
   const [copied, setCopied] = useState(false);
 
   const skaterId = Number(id);
-  const skater = SKATERS.find((item) => item.id === skaterId);
+  const [skater, setSkater] = useState<SkaterProfile | undefined>(() =>
+    SKATERS.find((item) => item.id === skaterId)
+  );
+
+  useEffect(() => {
+    if (skater) return;
+
+    try {
+      const stored = localStorage.getItem(REGISTERED_SKATERS_KEY);
+      const registered = stored
+        ? (JSON.parse(stored) as SkaterProfile[])
+        : [];
+      setSkater(
+        registered.find((item) => item.id === skaterId)
+      );
+    } catch {
+      setSkater(undefined);
+    }
+  }, [skater, skaterId]);
 
   if (!skater) {
     return (

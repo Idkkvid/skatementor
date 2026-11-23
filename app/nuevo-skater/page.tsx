@@ -218,10 +218,10 @@ export default function NuevoSkaterPage() {
             </div>
             <div className="flex flex-col">
               <span className="font-label-sm text-label-sm uppercase text-secondary">
-                Integración API Ready
+                Registro de instructor
               </span>
               <span className="font-headline-md text-headline-md text-on-surface">
-                Registro local beta
+                Vista previa pública
               </span>
             </div>
           </div>
@@ -553,7 +553,7 @@ export default function NuevoSkaterPage() {
                   />
                 </div>
 
-                {/* S3 Photo Upload */}
+                {/* Photo preview */}
                 <div className="flex flex-col gap-1.5">
                   <label
                     className="font-label-md text-label-md text-on-surface"
@@ -585,13 +585,6 @@ export default function NuevoSkaterPage() {
                     <p className="font-body-sm text-body-sm text-secondary mt-1">
                       Formatos permitidos: JPG, PNG, WEBP (Máx. 5MB)
                     </p>
-
-                    <div className="mt-space-md inline-flex items-center gap-1.5 px-space-md py-1 rounded-full bg-surface-container-lowest text-secondary font-label-sm text-label-sm shadow-sm">
-                      <span className="material-symbols-outlined text-[14px] text-tertiary">
-                        lock
-                      </span>
-                      <span>Vista previa local (S3 pendiente)</span>
-                    </div>
 
                     {fileName && (
                       <div className="mt-space-md flex flex-col items-center gap-2">

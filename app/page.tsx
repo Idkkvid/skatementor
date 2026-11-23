@@ -455,9 +455,12 @@ export default function CatalogoPage() {
                       </Link>
                     ) : (
                       <>
-                        <div className="w-full bg-surface-container text-on-surface-variant font-label-md text-label-md py-2 rounded-lg text-center">
-                          Perfil nuevo publicado
-                        </div>
+                        <Link
+                          className="w-full bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md py-2 rounded-lg transition-colors text-center"
+                          href={`/skater/preview/?id=${skater.id}`}
+                        >
+                          Ver Perfil Completo
+                        </Link>
                         {isAuthenticated && (
                           <button
                             className="w-full inline-flex items-center justify-center gap-space-xs border border-error/30 bg-error-container/70 text-on-error-container hover:bg-error-container hover:border-error/50 font-label-md text-label-md py-2.5 rounded-xl transition-all cursor-pointer shadow-sm"
