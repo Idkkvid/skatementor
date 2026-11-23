@@ -27,6 +27,10 @@ jobs:
         run: |
           test -d ./out || (echo "::error::Next.js no generó ./out. Verifica output: 'export' en next.config.ts"; exit 1)
           test -d ./out/_next || (echo "::error::La exportación no contiene ./out/_next"; exit 1)
+          test -f ./out/index.html || (echo "::error::Falta ./out/index.html"; exit 1)
+          test -f ./out/login/index.html || (echo "::error::Falta ./out/login/index.html"; exit 1)
+          test -f ./out/nuevo-skater/index.html || (echo "::error::Falta ./out/nuevo-skater/index.html"; exit 1)
+          test -f ./out/skater/1/index.html || (echo "::error::Falta ./out/skater/1/index.html"; exit 1)
 
       - name: Configurar credenciales de AWS
         uses: aws-actions/configure-aws-credentials@v6
