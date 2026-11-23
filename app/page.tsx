@@ -280,7 +280,9 @@ export default function CatalogoPage() {
               </div>
               <div>
                 <div className="font-headline-md text-headline-md font-bold text-on-surface">
-                  +25 Skaters
+                  {SKATERS.filter((skater) => !hiddenDefaultSkaters.includes(skater.id)).length +
+                    registeredSkaters.length}{" "}
+                  Skaters
                 </div>
                 <p className="font-body-sm text-body-sm text-secondary">
                   Instructores certificados y con trayectoria de competencia.

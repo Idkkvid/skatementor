@@ -172,12 +172,6 @@ export default function LoginPage() {
                   </span>
                   Acceso Obligatorio
                 </span>
-                <span className="inline-flex items-center gap-1 text-on-surface-variant font-label-sm text-label-sm">
-                  <span className="material-symbols-outlined text-[16px] text-tertiary">
-                    verified_user
-                  </span>
-                  Conexión SSL
-                </span>
               </div>
 
               <h1 className="font-headline-lg text-headline-lg text-on-surface tracking-tight mb-space-xs">
