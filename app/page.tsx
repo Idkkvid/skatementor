@@ -380,6 +380,9 @@ export default function CatalogoPage() {
                         alt={`Foto de ${skater.name}`}
                         className="w-full h-full object-cover"
                         src={skater.imageUrl}
+                        onError={(event) => {
+                          event.currentTarget.src = "/default-avatar.svg";
+                        }}
                       />
                       <span className="absolute top-space-sm right-space-sm px-2 py-0.5 bg-on-surface/90 text-on-primary rounded-full font-label-sm text-label-sm uppercase tracking-wide backdrop-blur-sm">
                         {skater.badgeTop}

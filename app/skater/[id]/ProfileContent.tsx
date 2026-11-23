@@ -152,8 +152,7 @@ export default function SkaterProfilePage({ id }: { id: string }) {
     const review: StudentReview = {
       studentName: adminName,
       subtitle: "Administrador verificado · SkateMentor",
-      avatarUrl:
-        "https://lh3.googleusercontent.com/aida/ALJJyrDxpuIwq5vtWr8IpJZAEYMPPJaF_asZV1Z824Uvzz1-uqoZV8n7w",
+      avatarUrl: "/default-avatar.svg",
       comment,
       achievement: "Perfil revisado por el equipo",
       fullWidth: true,
@@ -236,6 +235,9 @@ export default function SkaterProfilePage({ id }: { id: string }) {
                   alt={`Retrato de ${skater.name}`}
                   className="w-24 h-24 sm:w-28 sm:h-28 rounded-xl object-cover shadow-md"
                   src={skater.imageUrl}
+                  onError={(event) => {
+                    event.currentTarget.src = "/default-avatar.svg";
+                  }}
                 />
                 <span
                   className="absolute -bottom-2 -right-2 bg-tertiary text-on-tertiary p-1 rounded-full shadow-sm flex items-center justify-center"
@@ -639,6 +641,9 @@ export default function SkaterProfilePage({ id }: { id: string }) {
                             alt={review.studentName}
                             className="w-10 h-10 rounded-full object-cover"
                             src={review.avatarUrl}
+                            onError={(event) => {
+                              event.currentTarget.src = "/default-avatar.svg";
+                            }}
                           />
                           <div>
                             <h3 className="font-label-md text-label-md font-bold text-on-surface">
