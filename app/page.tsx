@@ -74,7 +74,9 @@ export default function CatalogoPage() {
         );
 
       const matchesLevel =
-        selectedLevel === "all" || skater.level === selectedLevel;
+        selectedLevel === "all" ||
+        skater.level === selectedLevel ||
+        skater.level === "Todos los niveles";
 
       let matchesPrice = true;
       if (selectedPrice === "low") matchesPrice = skater.price < 40000;

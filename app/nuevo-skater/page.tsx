@@ -19,6 +19,26 @@ const DISCIPLINE_OPTIONS = [
 const DEFAULT_AVATAR =
   "https://lh3.googleusercontent.com/aida-public/AB6AXuAKv4o8YklNlVIVdWT6vEbHL6CLScJ6F5HFvt8bEYiM3KfCj734yYJ_7YnVho4OucGKim6HyM0YRZVqb-_VFeUIsJJijrB6_N_5cNaAg6kspl4TdXcPoIvDy_EadHZAdZA6MY1C5RqA5NEcNYYIwzjXEgvjpDEUjIQ8x1k6_Cxd5RTiZ1svWz0eFAkz305PT-1vqgxFRW-q23nG5JvOahqJ1XavJMijJiQ2Fp99wnk";
 
+const EXPERIENCE_LABELS: Record<string, string> = {
+  "1-3": "1 a 3 años",
+  "4-6": "4 a 6 años",
+  "7+": "7 años o más",
+};
+
+const STUDENT_LEVEL_LABELS: Record<string, string> = {
+  all: "Todos los niveles",
+  beginner: "Iniciación",
+  intermediate: "Intermedio y Perfeccionamiento",
+  advanced: "Avanzado / Pro Prep",
+};
+
+const CATALOG_LEVEL_LABELS: Record<string, string> = {
+  all: "Todos los niveles",
+  beginner: "Iniciación",
+  intermediate: "Intermedio",
+  advanced: "Avanzado",
+};
+
 export default function NuevoSkaterPage() {
   const router = useRouter();
   const [isAuthorized, setIsAuthorized] = useState(false);
@@ -110,16 +130,22 @@ export default function NuevoSkaterPage() {
               .replace(" Transition", "") || value
           );
         });
+        const experienceLabel =
+          EXPERIENCE_LABELS[experienceYears] || "Experiencia por confirmar";
+        const studentLevelLabel =
+          STUDENT_LEVEL_LABELS[studentLevel] || "Todos los niveles";
+        const catalogLevelLabel =
+          CATALOG_LEVEL_LABELS[studentLevel] || "Todos los niveles";
 
         const newSkater: SkaterProfile = {
           id: nextId,
           mentorCode: `#SKM-${nextId}`,
           name: fullName,
           headline: normalizedDisciplines.join(", "),
-          experienceLabel: `${experienceYears || "Experiencia por confirmar"} de experiencia`,
-          experienceYearsText: experienceYears,
+          experienceLabel: `${experienceLabel} de experiencia`,
+          experienceYearsText: experienceLabel,
           badgeTop: "Nuevo Instructor",
-          verifiedLabel: "Perfil publicado",
+          verifiedLabel: "Pendiente de verificación",
           city,
           countryCity: `${city}, Colombia`,
           price: Number(hourlyRate),
@@ -128,10 +154,10 @@ export default function NuevoSkaterPage() {
           rating: "Nuevo",
           reviewsCount: 0,
           modalities: normalizedDisciplines,
-          level: studentLevel,
-          recommendedLevels: studentLevel,
-          sessionDuration: "Horario por acordar",
-          sessionMode: "Clase personalizada",
+          level: catalogLevelLabel,
+          recommendedLevels: studentLevelLabel,
+          sessionDuration: "Horario por acordar con el instructor",
+          sessionMode: `Clase personalizada · ${normalizedDisciplines.join(" / ")}`,
           bio,
           aboutParagraphs: [bio],
           metrics: {

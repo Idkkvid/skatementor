@@ -20,6 +20,7 @@ export interface StudentReview {
   comment: string;
   achievement: string;
   fullWidth?: boolean;
+  rating?: number;
 }
 
 export interface PracticeSpot {

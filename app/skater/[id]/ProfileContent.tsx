@@ -2,12 +2,28 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { SKATERS, type SkaterProfile } from "../../data/skaters";
+import {
+  SKATERS,
+  type SkaterProfile,
+  type StudentReview,
+} from "../../data/skaters";
+import {
+  isValidAccountEmail,
+  VALID_ACCOUNTS,
+} from "../../../lib/auth";
 
 const REGISTERED_SKATERS_KEY = "skatementor_registered_skaters";
+const ADMIN_REVIEWS_KEY = "skatementor_admin_reviews";
+const ADMIN_VERIFICATIONS_KEY = "skatementor_admin_verifications";
 
 export default function SkaterProfilePage({ id }: { id: string }) {
   const [copied, setCopied] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [adminName, setAdminName] = useState("");
+  const [adminComment, setAdminComment] = useState("");
+  const [adminRating, setAdminRating] = useState(5);
+  const [adminReviews, setAdminReviews] = useState<StudentReview[]>([]);
+  const [isVerified, setIsVerified] = useState(false);
 
   const skaterId = Number(id);
   const [skater, setSkater] = useState<SkaterProfile | undefined>(() =>
@@ -29,6 +45,52 @@ export default function SkaterProfilePage({ id }: { id: string }) {
       setSkater(undefined);
     }
   }, [skater, skaterId]);
+
+  useEffect(() => {
+    const session = document.cookie
+      .split("; ")
+      .find((item) => item.startsWith("skatementor_session="))
+      ?.split("=")[1];
+
+    if (!session) {
+      setIsAdmin(false);
+      return;
+    }
+
+    try {
+      const email = decodeURIComponent(session);
+      const account = VALID_ACCOUNTS.find(
+        (item) => item.email.toLowerCase() === email.trim().toLowerCase()
+      );
+      setIsAdmin(isValidAccountEmail(email));
+      setAdminName(
+        account?.email === "vidal@skatementor.com"
+          ? "Vidal Niebles"
+          : account?.email === "mateo@skatementor.com"
+            ? "Mateo Pérez"
+            : "Administrador"
+      );
+    } catch {
+      setIsAdmin(false);
+    }
+
+    try {
+      const reviewsRaw = localStorage.getItem(ADMIN_REVIEWS_KEY);
+      const reviews = reviewsRaw
+        ? (JSON.parse(reviewsRaw) as Record<string, StudentReview[]>)
+        : {};
+      setAdminReviews(reviews[String(skaterId)] || []);
+
+      const verificationsRaw = localStorage.getItem(ADMIN_VERIFICATIONS_KEY);
+      const verifications = verificationsRaw
+        ? (JSON.parse(verificationsRaw) as number[])
+        : [];
+      setIsVerified(verifications.includes(skaterId));
+    } catch {
+      setAdminReviews([]);
+      setIsVerified(false);
+    }
+  }, [skaterId]);
 
   if (!skater) {
     return (
@@ -65,6 +127,61 @@ export default function SkaterProfilePage({ id }: { id: string }) {
       setTimeout(() => setCopied(false), 3000);
     }
   };
+
+  const verifySkater = () => {
+    try {
+      const raw = localStorage.getItem(ADMIN_VERIFICATIONS_KEY);
+      const verifications = raw
+        ? (JSON.parse(raw) as number[])
+        : [];
+      const updated = [...new Set([...verifications, skaterId])];
+      localStorage.setItem(
+        ADMIN_VERIFICATIONS_KEY,
+        JSON.stringify(updated)
+      );
+      setIsVerified(true);
+    } catch {
+      window.alert("No se pudo guardar la verificación.");
+    }
+  };
+
+  const publishAdminReview = () => {
+    const comment = adminComment.trim();
+    if (!comment) return;
+
+    const review: StudentReview = {
+      studentName: adminName,
+      subtitle: "Administrador verificado · SkateMentor",
+      avatarUrl:
+        "https://lh3.googleusercontent.com/aida/ALJJyrDxpuIwq5vtWr8IpJZAEYMPPJaF_asZV1Z824Uvzz1-uqoZV8n7w",
+      comment,
+      achievement: "Perfil revisado por el equipo",
+      fullWidth: true,
+      rating: adminRating,
+    };
+
+    try {
+      const raw = localStorage.getItem(ADMIN_REVIEWS_KEY);
+      const reviews = raw
+        ? (JSON.parse(raw) as Record<string, StudentReview[]>)
+        : {};
+      const profileReviews = reviews[String(skaterId)] || [];
+      const updated = {
+        ...reviews,
+        [String(skaterId)]: [...profileReviews, review],
+      };
+      localStorage.setItem(ADMIN_REVIEWS_KEY, JSON.stringify(updated));
+      setAdminReviews(updated[String(skaterId)]);
+      setAdminComment("");
+    } catch {
+      window.alert("No se pudo guardar la reseña.");
+    }
+  };
+
+  const combinedReviews = [
+    ...skater.reviews,
+    ...adminReviews,
+  ];
 
   return (
     <div className="flex flex-col w-full pb-16 md:pb-0">
@@ -136,7 +253,7 @@ export default function SkaterProfilePage({ id }: { id: string }) {
               <div className="flex flex-col gap-1">
                 <div className="flex flex-wrap items-center gap-space-xs">
                   <span className="bg-primary-fixed text-on-primary-fixed font-label-sm text-label-sm px-2.5 py-0.5 rounded-full uppercase tracking-wider">
-                    {skater.verifiedLabel}
+                    {isVerified ? "Skater verificado por el equipo" : skater.verifiedLabel}
                   </span>
                   <span className="inline-flex items-center gap-0.5 text-on-surface-variant font-body-sm text-body-sm">
                     <span className="material-symbols-outlined text-[16px] text-primary">
@@ -438,10 +555,79 @@ export default function SkaterProfilePage({ id }: { id: string }) {
                 </div>
               </div>
 
+              {isAdmin && (
+                <div className="mb-space-md rounded-xl border border-primary-fixed bg-surface-container-low p-space-md">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-space-sm">
+                    <div>
+                      <p className="font-label-md text-label-md font-bold text-on-surface">
+                        Revisión del administrador
+                      </p>
+                      <p className="font-body-sm text-body-sm text-secondary">
+                        Publica como {adminName}.
+                      </p>
+                    </div>
+                    {!isVerified && (
+                      <button
+                        type="button"
+                        onClick={verifySkater}
+                        className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-tertiary-container text-on-tertiary-container px-space-md py-2 font-label-md text-label-md cursor-pointer"
+                      >
+                        <span className="material-symbols-outlined text-[18px]">
+                          verified
+                        </span>
+                        Verificar skater
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="mt-space-sm grid grid-cols-1 md:grid-cols-[160px_1fr] gap-space-sm">
+                    <label className="flex flex-col gap-1 font-label-sm text-label-sm text-on-surface">
+                      Calificación
+                      <select
+                        value={adminRating}
+                        onChange={(event) =>
+                          setAdminRating(Number(event.target.value))
+                        }
+                        className="rounded-lg bg-surface-container-lowest px-3 py-2 font-body-md text-body-md"
+                      >
+                        {[5, 4, 3, 2, 1].map((rating) => (
+                          <option key={rating} value={rating}>
+                            {rating} estrella{rating !== 1 ? "s" : ""}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <label className="flex flex-col gap-1 font-label-sm text-label-sm text-on-surface">
+                      Comentario
+                      <div className="flex flex-col sm:flex-row gap-space-xs">
+                        <textarea
+                          value={adminComment}
+                          onChange={(event) =>
+                            setAdminComment(event.target.value)
+                          }
+                          maxLength={450}
+                          rows={2}
+                          placeholder="Escribe la reseña del equipo..."
+                          className="min-h-10 flex-1 resize-none rounded-lg bg-surface-container-lowest px-3 py-2 font-body-md text-body-md"
+                        />
+                        <button
+                          type="button"
+                          disabled={!adminComment.trim()}
+                          onClick={publishAdminReview}
+                          className="rounded-lg bg-primary px-space-md py-2 text-on-primary font-label-md text-label-md disabled:opacity-50 cursor-pointer"
+                        >
+                          Publicar reseña
+                        </button>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+              )}
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-space-md">
-                {skater.reviews.map((review) => (
+                {combinedReviews.map((review) => (
                   <div
-                    key={review.studentName}
+                    key={`${review.studentName}-${review.comment}`}
                     className={`p-space-md rounded-xl bg-surface-container-low flex flex-col justify-between ${
                       review.fullWidth ? "md:col-span-2" : ""
                     }`}
@@ -467,8 +653,17 @@ export default function SkaterProfilePage({ id }: { id: string }) {
                           {[...Array(5)].map((_, sIdx) => (
                             <span
                               key={sIdx}
-                              className="material-symbols-outlined text-[16px]"
-                              style={{ fontVariationSettings: "'FILL' 1" }}
+                              className={`material-symbols-outlined text-[16px] ${
+                                sIdx < (review.rating || 5)
+                                  ? "text-primary"
+                                  : "text-outline-variant"
+                              }`}
+                              style={{
+                                fontVariationSettings:
+                                  sIdx < (review.rating || 5)
+                                    ? "'FILL' 1"
+                                    : "'FILL' 0",
+                              }}
                             >
                               star
                             </span>
