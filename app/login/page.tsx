@@ -2,17 +2,55 @@
 
 import { useState, FormEvent } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+
+// Configura aquí las credenciales autorizadas para entrar a SkateMentor
+const CREDENCIALES_VALIDAS = [
+  { email: "admin@skatementor.com", password: "Skate2026*" },
+  { email: "vidal@cuc.edu.co", password: "cuc2026" },
+  { email: "mateo@cuc.edu.co", password: "cuc2026" },
+];
 
 export default function LoginPage() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [loginFeedback, setLoginFeedback] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+
+  const iniciarSesionYEntrar = (correoUsuario: string) => {
+    const maxAge = rememberMe ? 60 * 60 * 24 * 7 : 60 * 60 * 4;
+    document.cookie = `skatementor_session=${encodeURIComponent(
+      correoUsuario
+    )}; path=/; max-age=${maxAge}; SameSite=Lax`;
+
+    router.push("/");
+    router.refresh();
+  };
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setLoginFeedback(true);
+    setErrorMsg("");
+
+    const correoNormalizado = email.trim().toLowerCase();
+    const usuarioAutorizado = CREDENCIALES_VALIDAS.find(
+      (cred) =>
+        cred.email.toLowerCase() === correoNormalizado &&
+        cred.password === password
+    );
+
+    if (!usuarioAutorizado) {
+      setErrorMsg("Correo o contraseña incorrectos. Verifica tus credenciales.");
+      return;
+    }
+
+    iniciarSesionYEntrar(usuarioAutorizado.email);
+  };
+
+  const handleGoogleLogin = () => {
+    // Usa la primera cuenta autorizada al simular el acceso rápido con Google
+    iniciarSesionYEntrar(CREDENCIALES_VALIDAS[0].email);
   };
 
   return (
@@ -49,7 +87,7 @@ export default function LoginPage() {
                 Comunidad Activa
               </span>
               <span className="text-surface-variant font-label-sm text-label-sm">
-                CUC · 2025
+                CUC · 2026
               </span>
             </div>
 
@@ -86,13 +124,12 @@ export default function LoginPage() {
           {/* Right Column: Login Interface */}
           <div className="col-span-1 lg:col-span-7 p-space-lg md:p-space-xl flex flex-col justify-between bg-surface-container-lowest">
             <div>
-              {/* Header & Badge */}
               <div className="flex items-center justify-between gap-space-sm mb-space-md">
                 <span className="inline-flex items-center gap-1.5 px-space-sm py-1 rounded-full bg-primary-fixed text-on-primary-fixed font-label-sm text-label-sm uppercase">
                   <span className="material-symbols-outlined text-[14px]">
                     sports_martial_arts
                   </span>
-                  Acceso Instructores &amp; Estudiantes
+                  Acceso Obligatorio
                 </span>
                 <span className="inline-flex items-center gap-1 text-on-surface-variant font-label-sm text-label-sm">
                   <span className="material-symbols-outlined text-[16px] text-tertiary">
@@ -106,13 +143,14 @@ export default function LoginPage() {
                 Inicia sesión en SkateMentor
               </h1>
               <p className="font-body-md text-body-md text-on-surface-variant mb-space-lg">
-                Accede para gestionar tu perfil de instructor o consultar tus clases y solicitudes activas.
+                Ingresa con una cuenta autorizada para explorar el catálogo de instructores, ver perfiles completos o registrar un skater.
               </p>
 
               {/* Quick Social Login */}
               <button
                 className="w-full flex items-center justify-center gap-space-sm py-3 px-space-md rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md transition-all shadow-sm active:scale-[0.99] group cursor-pointer"
                 type="button"
+                onClick={handleGoogleLogin}
               >
                 <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24">
                   <path
@@ -145,9 +183,21 @@ export default function LoginPage() {
                 </span>
               </div>
 
+              {/* Error Alert Banner */}
+              {errorMsg && (
+                <div
+                  className="mb-space-md p-space-sm rounded-lg bg-error-container text-on-error-container font-body-sm text-body-sm flex items-center gap-2"
+                  role="alert"
+                >
+                  <span className="material-symbols-outlined text-[18px] shrink-0">
+                    error
+                  </span>
+                  <span>{errorMsg}</span>
+                </div>
+              )}
+
               {/* Credential Login Form */}
               <form className="flex flex-col gap-space-md" onSubmit={handleSubmit}>
-                {/* Email Field */}
                 <div className="flex flex-col gap-1.5">
                   <label
                     className="font-label-md text-label-md text-on-surface flex items-center justify-between"
@@ -167,16 +217,18 @@ export default function LoginPage() {
                       className="w-full bg-surface rounded-lg py-2.5 pl-10 pr-3.5 font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant/60 focus:bg-surface-container-lowest focus:outline-none focus:ring-2 focus:ring-primary transition-all"
                       id="email"
                       name="email"
-                      placeholder="tu.correo@ejemplo.com"
+                      placeholder="admin@skatementor.com"
                       required
                       type="email"
                       value={email}
-                      onChange={(e) => setEmail(e.target.value)}
+                      onChange={(e) => {
+                        setEmail(e.target.value);
+                        if (errorMsg) setErrorMsg("");
+                      }}
                     />
                   </div>
                 </div>
 
-                {/* Password Field */}
                 <div className="flex flex-col gap-1.5">
                   <label
                     className="font-label-md text-label-md text-on-surface flex items-center justify-between"
@@ -197,7 +249,10 @@ export default function LoginPage() {
                       required
                       type={showPassword ? "text" : "password"}
                       value={password}
-                      onChange={(e) => setPassword(e.target.value)}
+                      onChange={(e) => {
+                        setPassword(e.target.value);
+                        if (errorMsg) setErrorMsg("");
+                      }}
                     />
                     <button
                       aria-label="Mostrar u ocultar contraseña"
@@ -212,7 +267,6 @@ export default function LoginPage() {
                   </div>
                 </div>
 
-                {/* Options Row */}
                 <div className="flex items-center justify-between pt-1">
                   <label className="flex items-center gap-2 cursor-pointer select-none">
                     <input
@@ -235,7 +289,6 @@ export default function LoginPage() {
                   </Link>
                 </div>
 
-                {/* Primary Submit Button */}
                 <button
                   className="w-full mt-2 py-3 px-space-md rounded-lg bg-primary hover:bg-primary-container text-on-primary font-headline-md text-body-lg font-bold flex items-center justify-center gap-space-xs shadow-md transition-all active:scale-[0.99] group cursor-pointer"
                   type="submit"
@@ -245,42 +298,9 @@ export default function LoginPage() {
                     arrow_forward
                   </span>
                 </button>
-
-                {loginFeedback && (
-                  <div className="rounded-lg bg-tertiary-fixed/40 text-on-tertiary-fixed px-space-md py-2.5 font-body-sm text-body-sm flex items-center gap-2">
-                    <span className="material-symbols-outlined text-[18px] text-tertiary">
-                      check_circle
-                    </span>
-                    <span>
-                      Credenciales validadas para <strong>{email}</strong>. Listo para conectar con el backend de autenticación.
-                    </span>
-                  </div>
-                )}
               </form>
-
-              {/* Register Instructor CTA */}
-              <div className="mt-space-lg p-space-md rounded-lg bg-surface-container flex flex-col sm:flex-row items-center justify-between gap-space-sm text-center sm:text-left">
-                <div>
-                  <p className="font-label-md text-label-md text-on-surface">
-                    ¿Aún no tienes cuenta en SkateMentor?
-                  </p>
-                  <p className="font-body-sm text-body-sm text-on-surface-variant">
-                    Publica tus clases o agenda mentorías
-                  </p>
-                </div>
-                <Link
-                  className="inline-flex items-center gap-1 font-label-md text-label-md text-primary hover:text-primary-container font-bold shrink-0 underline decoration-2 underline-offset-4"
-                  href="/nuevo-skater"
-                >
-                  <span>Regístrate aquí</span>
-                  <span className="material-symbols-outlined text-[16px]">
-                    north_east
-                  </span>
-                </Link>
-              </div>
             </div>
 
-            {/* Institutional Footer Note */}
             <div className="mt-space-lg pt-space-md text-center">
               <div className="flex items-center justify-center gap-2 text-on-surface-variant/80 font-body-sm text-body-sm">
                 <span className="material-symbols-outlined text-[16px]">
