@@ -18,6 +18,15 @@ jobs:
 
       - run: npm ci
 
+      - name: Validar configuración de S3
+        run: |
+          if [ -z "$S3_BUCKET" ]; then
+            echo "::error::Falta configurar el secreto S3_BUCKET en Settings > Secrets and variables > Actions."
+            exit 1
+          fi
+        env:
+          S3_BUCKET: ${{ secrets.S3_BUCKET }}
+
       - name: Build con assetPrefix hacia S3
         run: npm run build
         env:
