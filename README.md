@@ -112,6 +112,14 @@ npm run build
 
 ![Formulario para publicar un nuevo skater](docs/evidencias/03-nuevo-skater.png)
 
+### Catálogo con perfiles disponibles
+
+![Tarjetas de skaters disponibles](docs/evidencias/06-catalogo-tarjetas.png)
+
+### Perfil completo
+
+![Perfil completo de una skater](docs/evidencias/07-perfil-completo.png)
+
 ## Equipo
 
 | Integrante | Programa |
