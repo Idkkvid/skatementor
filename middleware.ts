@@ -2,8 +2,18 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export function middleware(request: NextRequest) {
-  const session = request.cookies.get("skatementor_session")?.value;
   const { pathname } = request.nextUrl;
+
+  // Permitir siempre archivos internos de Next.js (CSS, JS, fuentes) y recursos con extensión
+  if (
+    pathname.startsWith("/_next") ||
+    pathname.startsWith("/api") ||
+    pathname.includes(".")
+  ) {
+    return NextResponse.next();
+  }
+
+  const session = request.cookies.get("skatementor_session")?.value;
 
   // Si no hay sesión y el usuario intenta entrar a cualquier ruta distinta de /login
   if (!session && pathname !== "/login") {
@@ -21,10 +31,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: [
-    /*
-     * Protege todas las rutas excepto archivos estáticos internos de Next.js e imágenes
-     */
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
-  ],
+  matcher: ["/:path*"],
 };
