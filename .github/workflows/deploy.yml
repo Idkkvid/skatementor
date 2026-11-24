@@ -21,7 +21,7 @@ jobs:
       - name: Build con assetPrefix hacia S3
         run: npm run build
         env:
-          ASSET_PREFIX: https://todo-estatico-mateeoperez-2026.s3.us-east-1.amazonaws.com
+          ASSET_PREFIX: https://todo-estatico-mateoperez-2026.s3.us-east-1.amazonaws.com
 
       - name: Validar exportación estática
         run: |
