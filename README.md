@@ -9,7 +9,7 @@ Plataforma web para encontrar skaters que ofrecen clases y contactarlos directam
   <img alt="AWS" src="https://img.shields.io/badge/AWS-FF9900?logo=amazonwebservices&logoColor=white">
 </p>
 
-🌐 **[skatementor.live](http://skatementor.live/)**
+🌐 **[skatementor.live](http://skate-mentor.live/)**
 
 ## Contenido
 
@@ -117,11 +117,11 @@ Secretos necesarios en **GitHub → Settings → Secrets and variables → Actio
 
 > Las credenciales temporales de AWS Academy expiran al terminar la sesión. Deben actualizarse antes de ejecutar un despliegue que las necesite.
 
-Para comprobar el despliegue, abre [http://skatementor.live](http://skatementor.live/) y [http://skatementor.live/health.html](http://skatementor.live/health.html). La segunda URL verifica que el servidor web responda con `OK`.
+Para comprobar el despliegue, abre [http://skate-mentor.live](http://skate-mentor.live/) y [http://skate-mentor.live/health.html](http://skate-mentor.live/health.html). La segunda URL verifica que el servidor web responda con `OK`.
 
 ## Dominio personalizado y AWS
 
-La aplicación está disponible mediante el dominio personalizado **[skatementor.live](http://skatementor.live/)**.
+La aplicación está disponible mediante el dominio personalizado **[skate-mentor.live](http://skate-mentor.live/)**.
 
 El dominio fue adquirido en **name.com** mediante el beneficio de GitHub Student Developer Pack y configurado con los nameservers de Amazon Route 53. Route 53 resuelve el dominio hacia la dirección IPv4 pública asociada a la instancia EC2. El grupo de seguridad de la instancia controla el acceso al puerto web y al acceso SSH.
 
